@@ -30,15 +30,7 @@ function formatTime(d: Date) {
 function LogoBadge() {
   return (
     <div className="logo-badge">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M4 20L10 8L13 14L16 9L20 20"
-          stroke="#1a1206"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <img src="/logo.jpg" alt="Kwendura Infinity Corporation" />
     </div>
   );
 }
