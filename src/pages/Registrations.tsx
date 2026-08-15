@@ -181,7 +181,7 @@ export default function Registrations() {
     <div className="page">
       <div className="header">
         <div className="header-left">
-          <LogoBadge />
+          {/* <LogoBadge /> */}
           <div className="header-title">
             <p className="eyebrow">COPPERBELT MARATHON 2026</p>
             <h1>Registrations</h1>
