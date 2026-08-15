@@ -227,11 +227,11 @@ export default function Registrations() {
             <p className="stat-value">{pendingCount}</p>
             <p className="stat-sub">awaiting payment</p>
           </div>
-          <div className="stat-card revenue">
+          {/* <div className="stat-card revenue">
             <p className="stat-label">REVENUE</p>
             <p className="stat-value">K{Number(stats.revenue_confirmed).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
             <p className="stat-sub">collected</p>
-          </div>
+          </div> */}
           <div className="stat-card">
             <p className="stat-label">TODAY</p>
             <p className="stat-value">{stats.today_count ?? 0}</p>
