@@ -223,9 +223,9 @@ export default function Registrations() {
             <p className="stat-sub">confirmed</p>
           </div>
           <div className="stat-card">
-            <p className="stat-label">PENDING</p>
+            <p className="stat-label">AWAITING CONFIRMATION | RESERVED | EXEMPTED </p>
             <p className="stat-value">{pendingCount}</p>
-            <p className="stat-sub">awaiting payment</p>
+            <p className="stat-sub">awaiting confirmation | Reserved | Exempted </p>
           </div>
           {/* <div className="stat-card revenue">
             <p className="stat-label">REVENUE</p>
