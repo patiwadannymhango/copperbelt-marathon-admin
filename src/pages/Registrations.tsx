@@ -27,13 +27,13 @@ function formatTime(d: Date) {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
-function LogoBadge() {
-  return (
-    <div className="logo-badge">
-      <img src="/logo.jpg" alt="Kwendura Infinity Corporation" />
-    </div>
-  );
-}
+// function LogoBadge() {
+//   return (
+//     <div className="logo-badge">
+//       <img src="/logo.jpg" alt="Kwendura Infinity Corporation" />
+//     </div>
+//   );
+// }
 
 export default function Registrations() {
   const { logout } = useAuth();
