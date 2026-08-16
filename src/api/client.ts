@@ -97,6 +97,37 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
   return res.json();
 }
 
+// For binary downloads (e.g. Excel export) that can't go through apiFetch's
+// res.json() parsing — shares the same 401-refresh-retry flow so an export
+// doesn't silently fail just because the access token expired mid-session.
+export async function apiFetchBlob(path: string): Promise<Blob> {
+  async function doFetch(): Promise<Response> {
+    const headers: Record<string, string> = {};
+    const token = getAccessToken();
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return fetch(`${API_BASE_URL}${path}`, { headers });
+  }
+
+  let res = await doFetch();
+
+  if (res.status === 401) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) {
+      res = await doFetch();
+    } else {
+      clearTokens();
+      window.location.href = '/login';
+      throw new Error('Session expired. Please log in again.');
+    }
+  }
+
+  if (!res.ok) {
+    throw new Error(`Export failed (${res.status}).`);
+  }
+
+  return res.blob();
+}
+
 export async function login(email: string, password: string) {
   const res = await fetch(`${API_BASE_URL}/api/v1/auth/login/`, {
     method: 'POST',
