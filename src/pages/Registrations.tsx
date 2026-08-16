@@ -11,31 +11,6 @@ import {
   type DashboardStats,
   type FilterOptions,
 } from '../api/registrations';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  FormControl,
-  Grid,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import DownloadIcon from '@mui/icons-material/Download';
-import LogoutIcon from '@mui/icons-material/Logout';
-import SearchIcon from '@mui/icons-material/Search';
-import { LineChart } from '@mui/x-charts/LineChart';
-import { BarChart } from '@mui/x-charts/BarChart';
-import { PieChart } from '@mui/x-charts/PieChart';
 
 const PAGE_SIZE = 25;
 const REFRESH_INTERVAL_MS = 30000;
@@ -52,18 +27,19 @@ function formatTime(d: Date) {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
-// Parsed as a local date (not UTC) so the "last 14 days" trend chart doesn't
-// shift a day off depending on the browser's timezone.
-function formatChartDate(isoDate: string) {
-  const [y, m, d] = isoDate.split('-').map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
+// function LogoBadge() {
+//   return (
+//     <div className="logo-badge">
+//       <img src="/logo.jpg" alt="Kwendura Infinity Corporation" />
+//     </div>
+//   );
+// }
 
 export default function Registrations() {
   const { logout } = useAuth();
 
   const [now, setNow] = useState(new Date());
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [stats, setStats] = useState<DashboardStats & { today_count?: number } | null>(null);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
 
   const [rows, setRows] = useState<AdminRegistration[]>([]);
@@ -201,317 +177,143 @@ export default function Registrations() {
 
   const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
-  const chartDates = stats?.daily_registrations.map((d) => formatChartDate(d.date)) ?? [];
-  const chartConfirmed = stats?.daily_registrations.map((d) => d.confirmed) ?? [];
-  const chartOther = stats?.daily_registrations.map((d) => d.other) ?? [];
-  const categoryData = stats?.by_category ?? [];
-  const countryPieData = (stats?.by_country ?? []).map((c, i) => ({
-    id: i,
-    value: c.count,
-    label: c.country,
-  }));
-
   return (
-    <Box sx={{ minHeight: '100vh', p: { xs: 2, sm: 3, md: 4 } }}>
-      <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        justifyContent="space-between"
-        alignItems={{ xs: 'flex-start', sm: 'center' }}
-        spacing={2}
-        sx={{ pb: 3, mb: 3, borderBottom: 1, borderColor: 'divider' }}
-      >
-        <Stack direction="row" alignItems="center" spacing={1.5}>
-          <Avatar src="/logo.png" variant="rounded" sx={{ width: 44, height: 44 }} />
-          <Box>
-            <Typography variant="overline" color="primary" fontWeight={700} lineHeight={1.2} display="block">
-              Copperbelt Marathon 2026
-            </Typography>
-            <Typography variant="h5" fontWeight={800} lineHeight={1.2}>
-              Registrations
-            </Typography>
-          </Box>
-        </Stack>
-
-        <Stack direction="row" alignItems="center" spacing={1.5} flexWrap="wrap" useFlexGap>
-          <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mr: 0.5 }}>
-            <Box
-              sx={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                bgcolor: 'success.main',
-                boxShadow: '0 0 0 3px rgba(52, 211, 153, 0.15)',
-              }}
-            />
-            <Typography variant="caption" color="text.secondary" whiteSpace="nowrap">
-              Live · {formatTime(now)}
-            </Typography>
-          </Stack>
-          <Button variant="outlined" startIcon={<RefreshIcon />} onClick={handleRefresh}>
-            Refresh
-          </Button>
-          <Button variant="contained" color="success" startIcon={<AddIcon />} onClick={() => setAddOpen(true)}>
-            Add Person
-          </Button>
-          <Button
-            variant="contained"
-            color="warning"
-            startIcon={<DownloadIcon />}
-            onClick={handleExport}
-            disabled={exportBusy}
-          >
-            {exportBusy ? 'Exporting…' : 'Export Excel'}
-          </Button>
-          <Button variant="outlined" color="inherit" startIcon={<LogoutIcon />} onClick={logout}>
+    <div className="page">
+      <div className="header">
+        <div className="header-left">
+          {/* <LogoBadge /> */}
+          <div className="header-title">
+            <p className="eyebrow">COPPERBELT MARATHON 2026</p>
+            <h1>Registrations</h1>
+          </div>
+        </div>
+        <div className="header-right">
+          <span className="live-indicator">
+            <span className="live-dot" />
+            Live · {formatTime(now)}
+          </span>
+          <button className="btn" onClick={handleRefresh}>
+            ↻ Refresh
+          </button>
+          <button className="btn btn-success" onClick={() => setAddOpen(true)}>
+            + Add Person
+          </button>
+          <button className="btn btn-amber" onClick={handleExport} disabled={exportBusy}>
+            {exportBusy ? 'Exporting…' : '↓ Export Excel'}
+          </button>
+          <button className="btn" onClick={logout}>
             Log out
-          </Button>
-        </Stack>
-      </Stack>
+          </button>
+        </div>
+      </div>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
-          {error}
-        </Alert>
-      )}
-      {notice && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setNotice('')}>
-          {notice}
-        </Alert>
-      )}
+      {error && <div className="banner banner-error">{error}</div>}
+      {notice && <div className="banner banner-success">{notice}</div>}
 
       {stats && (
-        <>
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Typography variant="overline" color="text.secondary">
-                    Total
-                  </Typography>
-                  <Typography variant="h4" fontWeight={800}>
-                    {stats.total_registrations}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    registrations
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Typography variant="overline" color="text.secondary">
-                    Paid
-                  </Typography>
-                  <Typography variant="h4" fontWeight={800} color="success.main">
-                    {statusCount('CONFIRMED')}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    confirmed
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Typography variant="overline" color="text.secondary">
-                    Awaiting Confirmation | Reserved | Exempted
-                  </Typography>
-                  <Typography variant="h4" fontWeight={800}>
-                    {pendingCount}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    awaiting confirmation · reserved · exempted
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Typography variant="overline" color="text.secondary">
-                    Today
-                  </Typography>
-                  <Typography variant="h4" fontWeight={800}>
-                    {stats.today_count ?? 0}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    new today
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid item xs={12} md={7}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-                    Registrations — last 14 days
-                  </Typography>
-                  {chartDates.length > 0 ? (
-                    <LineChart
-                      height={260}
-                      xAxis={[{ scaleType: 'point', data: chartDates }]}
-                      series={[
-                        { data: chartConfirmed, label: 'Confirmed', color: '#34d399', area: true },
-                        { data: chartOther, label: 'Not yet confirmed', color: '#e2954f', area: true },
-                      ]}
-                    />
-                  ) : (
-                    <Typography color="text.secondary" variant="body2">
-                      No data yet.
-                    </Typography>
-                  )}
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={5}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-                    Registrations by country
-                  </Typography>
-                  {countryPieData.length > 0 ? (
-                    <PieChart
-                      height={260}
-                      series={[{ data: countryPieData, innerRadius: 40, paddingAngle: 2 }]}
-                      slotProps={{ legend: { direction: 'column' } }}
-                    />
-                  ) : (
-                    <Typography color="text.secondary" variant="body2">
-                      No data yet.
-                    </Typography>
-                  )}
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-                    Registrations by race category
-                  </Typography>
-                  {categoryData.length > 0 ? (
-                    <BarChart
-                      height={260}
-                      xAxis={[{ scaleType: 'band', data: categoryData.map((c) => c.name || 'Unknown') }]}
-                      series={[{ data: categoryData.map((c) => c.count), label: 'Registrations', color: '#5b8def' }]}
-                    />
-                  ) : (
-                    <Typography color="text.secondary" variant="body2">
-                      No data yet.
-                    </Typography>
-                  )}
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </>
+        <div className="stats-row">
+          <div className="stat-card">
+            <p className="stat-label">TOTAL</p>
+            <p className="stat-value">{stats.total_registrations}</p>
+            <p className="stat-sub">registrations</p>
+          </div>
+          <div className="stat-card paid">
+            <p className="stat-label">PAID</p>
+            <p className="stat-value">{statusCount('CONFIRMED')}</p>
+            <p className="stat-sub">confirmed</p>
+          </div>
+          <div className="stat-card">
+            <p className="stat-label">AWAITING CONFIRMATION | RESERVED | EXEMPTED </p>
+            <p className="stat-value">{pendingCount}</p>
+            <p className="stat-sub">awaiting confirmation | Reserved | Exempted </p>
+          </div>
+          {/* <div className="stat-card revenue">
+            <p className="stat-label">REVENUE</p>
+            <p className="stat-value">K{Number(stats.revenue_confirmed).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+            <p className="stat-sub">collected</p>
+          </div> */}
+          <div className="stat-card">
+            <p className="stat-label">TODAY</p>
+            <p className="stat-value">{stats.today_count ?? 0}</p>
+            <p className="stat-sub">new today</p>
+          </div>
+        </div>
       )}
 
-      <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap alignItems="center" sx={{ mb: 2 }}>
-        <TextField
-          size="small"
+      <div className="filters-row">
+        <input
+          className="filter-input"
           placeholder="Search name, email, phone, reference…"
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
             setPage(1);
           }}
-          sx={{ minWidth: 240, flex: 1 }}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-            },
-          }}
         />
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel id="status-filter-label">Status</InputLabel>
-          <Select
-            labelId="status-filter-label"
-            label="Status"
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setPage(1);
-            }}
-          >
-            <MenuItem value="">All statuses</MenuItem>
-            {STATUS_OPTIONS.map((s) => (
-              <MenuItem key={s} value={s}>
-                {titleCase(s)}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel id="race-filter-label">Race</InputLabel>
-          <Select
-            labelId="race-filter-label"
-            label="Race"
-            value={raceFilter}
-            onChange={(e) => {
-              setRaceFilter(e.target.value);
-              setPage(1);
-            }}
-          >
-            <MenuItem value="">All races</MenuItem>
-            {filterOptions?.categories.map((c) => (
-              <MenuItem key={c.id} value={c.id}>
-                {c.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl size="small" sx={{ minWidth: 140 }}>
-          <InputLabel id="gender-filter-label">Gender</InputLabel>
-          <Select
-            labelId="gender-filter-label"
-            label="Gender"
-            value={genderFilter}
-            onChange={(e) => {
-              setGenderFilter(e.target.value);
-              setPage(1);
-            }}
-          >
-            <MenuItem value="">All genders</MenuItem>
-            {filterOptions?.genders.map((g) => (
-              <MenuItem key={g} value={g}>
-                {titleCase(g)}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl size="small" sx={{ minWidth: 170 }}>
-          <InputLabel id="org-filter-label">Organisation</InputLabel>
-          <Select
-            labelId="org-filter-label"
-            label="Organisation"
-            value={orgFilter}
-            onChange={(e) => {
-              setOrgFilter(e.target.value);
-              setPage(1);
-            }}
-          >
-            <MenuItem value="">All organisations</MenuItem>
-            {filterOptions?.organisations.map((o) => (
-              <MenuItem key={o} value={o}>
-                {o}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto', whiteSpace: 'nowrap' }}>
+        <select
+          className="filter-select"
+          value={statusFilter}
+          onChange={(e) => {
+            setStatusFilter(e.target.value);
+            setPage(1);
+          }}
+        >
+          <option value="">All statuses</option>
+          {STATUS_OPTIONS.map((s) => (
+            <option key={s} value={s}>
+              {titleCase(s)}
+            </option>
+          ))}
+        </select>
+        <select
+          className="filter-select"
+          value={raceFilter}
+          onChange={(e) => {
+            setRaceFilter(e.target.value);
+            setPage(1);
+          }}
+        >
+          <option value="">All races</option>
+          {filterOptions?.categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+        <select
+          className="filter-select"
+          value={genderFilter}
+          onChange={(e) => {
+            setGenderFilter(e.target.value);
+            setPage(1);
+          }}
+        >
+          <option value="">All genders</option>
+          {filterOptions?.genders.map((g) => (
+            <option key={g} value={g}>
+              {titleCase(g)}
+            </option>
+          ))}
+        </select>
+        <select
+          className="filter-select"
+          value={orgFilter}
+          onChange={(e) => {
+            setOrgFilter(e.target.value);
+            setPage(1);
+          }}
+        >
+          <option value="">All organisations</option>
+          {filterOptions?.organisations.map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+        <span className="filters-count">
           {count} of {stats?.total_registrations ?? count}
-        </Typography>
-      </Stack>
+        </span>
+      </div>
 
       <div className="table-card">
         <div className="table-scroll">
@@ -637,6 +439,6 @@ export default function Registrations() {
           </div>
         </div>
       )}
-    </Box>
+    </div>
   );
 }

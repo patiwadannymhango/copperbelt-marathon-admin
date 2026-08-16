@@ -1,4 +1,4 @@
-import { apiFetch, apiFetchBlob, EVENT_ID } from './client';
+import { apiFetch, EVENT_ID } from './client';
 
 export interface Participant {
   id: string;
@@ -66,15 +66,11 @@ export const STATUS_OPTIONS = [
 
 export interface DashboardStats {
   total_registrations: number;
-  today_count: number;
   by_status: { status: string; count: number }[];
   revenue_confirmed: string;
   revenue_pending: string;
   wallet_balance: string;
   wallet_pending_balance: string;
-  daily_registrations: { date: string; confirmed: number; other: number }[];
-  by_category: { name: string; count: number }[];
-  by_country: { country: string; count: number }[];
 }
 
 export async function getDashboard(): Promise<DashboardStats> {
@@ -126,5 +122,12 @@ export async function createRegistrationManually(payload: {
 // it can't just be an <a href> like a public download link — fetched as a
 // blob and saved client-side instead (see Registrations.tsx).
 export async function downloadExport(): Promise<Blob> {
-  return apiFetchBlob(`/api/v1/registrations/admin/events/${EVENT_ID}/registrations/export/`);
+  const { API_BASE_URL } = await import('./client');
+  const token = localStorage.getItem('cbm-admin2-access');
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/registrations/admin/events/${EVENT_ID}/registrations/export/`,
+    { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+  );
+  if (!res.ok) throw new Error('Export failed.');
+  return res.blob();
 }

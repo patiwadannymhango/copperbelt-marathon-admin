@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Box, Button, Paper, Stack, TextField, Typography } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
@@ -26,56 +25,40 @@ export default function Login() {
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        bgcolor: 'background.default',
-      }}
-    >
-      <Paper component="form" onSubmit={handleSubmit} variant="outlined" sx={{ p: 4, width: '100%', maxWidth: 360 }}>
-        <Typography variant="overline" color="primary" fontWeight={700}>
-          Copperbelt Marathon 2026
-        </Typography>
-        <Typography variant="h6" fontWeight={800}>
-          Registrations
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Admin sign in
-        </Typography>
+    <div className="login-screen">
+      <form className="login-card" onSubmit={handleSubmit}>
+        <p className="eyebrow">COPPERBELT MARATHON 2026</p>
+        <h1>Registrations</h1>
+        <p className="sub">Admin sign in</p>
 
-        <Stack spacing={2}>
-          <TextField
-            label="Email"
+        <div className="field">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             autoFocus
-            fullWidth
           />
-          <TextField
-            label="Password"
+        </div>
+        <div className="field">
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            fullWidth
           />
-        </Stack>
+        </div>
 
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
-        )}
+        {error && <div className="banner banner-error">{error}</div>}
 
-        <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }} disabled={loading}>
+        <button type="submit" className="btn btn-amber btn-full" disabled={loading} style={{ marginTop: 8 }}>
           {loading ? 'Signing in…' : 'Sign in'}
-        </Button>
-      </Paper>
-    </Box>
+        </button>
+      </form>
+    </div>
   );
 }
