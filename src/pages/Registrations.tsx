@@ -91,6 +91,7 @@ export default function Registrations() {
     emergency_contact_name: '',
     emergency_contact_phone: '',
     medical_notes: '',
+    status: 'CONFIRMED',
   });
   const [exportBusy, setExportBusy] = useState(false);
 
@@ -180,7 +181,7 @@ export default function Registrations() {
           emergency_contact_phone: addForm.emergency_contact_phone,
           medical_notes: addForm.medical_notes,
         },
-        status: 'CONFIRMED',
+        status: addForm.status,
       });
       setNotice('Person registered.');
       setAddOpen(false);
@@ -199,6 +200,7 @@ export default function Registrations() {
         emergency_contact_name: '',
         emergency_contact_phone: '',
         medical_notes: '',
+        status: 'CONFIRMED',
       });
       load();
       loadStats();
@@ -480,6 +482,21 @@ export default function Registrations() {
                 {filterOptions?.categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label>Status</label>
+              <select
+                className="filter-select"
+                style={{ width: '100%' }}
+                value={addForm.status}
+                onChange={(e) => setAddForm({ ...addForm, status: e.target.value })}
+              >
+                {STATUS_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {titleCase(s)}
                   </option>
                 ))}
               </select>
