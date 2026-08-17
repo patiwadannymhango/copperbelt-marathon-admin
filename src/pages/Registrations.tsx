@@ -27,6 +27,25 @@ function formatTime(d: Date) {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
+// Matches the public registration form's exact field options/values, so an
+// admin-entered registration validates the same way a public one does.
+const GENDER_OPTIONS = ['male', 'female'];
+const AGE_RANGE_OPTIONS = ['Under 18', '18-29', '30-39', '40-49', '50-59', '60+'];
+const TSHIRT_SIZE_OPTIONS = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL'];
+const ATTENDANCE_TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: 'in-person', label: 'In-person' },
+  { value: 'virtual', label: 'Virtual' },
+];
+
+// Collapses the backend's 8 statuses down to the 4 buckets the admin cares
+// about at a glance.
+function registrationStatusLabel(status: string): 'Confirmed' | 'Reserved' | 'Unconfirmed' | 'Exempted' {
+  if (status === 'CONFIRMED') return 'Confirmed';
+  if (status === 'RESERVED') return 'Reserved';
+  if (status === 'CANCELLED' || status === 'EXPIRED' || status === 'REFUNDED') return 'Exempted';
+  return 'Unconfirmed';
+}
+
 // function LogoBadge() {
 //   return (
 //     <div className="logo-badge">
@@ -63,6 +82,15 @@ export default function Registrations() {
     email: '',
     phone: '',
     category_id: '',
+    gender: '',
+    age_range: '',
+    country: '',
+    tshirt_size: '',
+    attendance_type: '',
+    club_or_institution: '',
+    emergency_contact_name: '',
+    emergency_contact_phone: '',
+    medical_notes: '',
   });
   const [exportBusy, setExportBusy] = useState(false);
 
@@ -141,11 +169,37 @@ export default function Registrations() {
           email: addForm.email,
           phone: addForm.phone,
         },
+        form_data: {
+          gender: addForm.gender,
+          age_range: addForm.age_range,
+          country: addForm.country,
+          tshirt_size: addForm.tshirt_size,
+          attendance_type: addForm.attendance_type,
+          club_or_institution: addForm.club_or_institution,
+          emergency_contact_name: addForm.emergency_contact_name,
+          emergency_contact_phone: addForm.emergency_contact_phone,
+          medical_notes: addForm.medical_notes,
+        },
         status: 'CONFIRMED',
       });
       setNotice('Person registered.');
       setAddOpen(false);
-      setAddForm({ first_name: '', last_name: '', email: '', phone: '', category_id: '' });
+      setAddForm({
+        first_name: '',
+        last_name: '',
+        email: '',
+        phone: '',
+        category_id: '',
+        gender: '',
+        age_range: '',
+        country: '',
+        tshirt_size: '',
+        attendance_type: '',
+        club_or_institution: '',
+        emergency_contact_name: '',
+        emergency_contact_phone: '',
+        medical_notes: '',
+      });
       load();
       loadStats();
     } catch (err) {
@@ -332,6 +386,7 @@ export default function Registrations() {
                 <th>Phone</th>
                 <th>Email</th>
                 <th>Shirt</th>
+                <th>Registration Status</th>
               </tr>
             </thead>
             <tbody>
@@ -357,6 +412,11 @@ export default function Registrations() {
                   <td className={r.participant.phone ? '' : 'dim'}>{r.participant.phone || '—'}</td>
                   <td className={r.participant.email ? '' : 'dim'}>{r.participant.email || '—'}</td>
                   <td className={r.form_data.tshirt_size ? '' : 'dim'}>{r.form_data.tshirt_size || '—'}</td>
+                  <td>
+                    <span className={`status-badge status-${r.status}`}>
+                      {registrationStatusLabel(r.status)}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -424,6 +484,107 @@ export default function Registrations() {
                 ))}
               </select>
             </div>
+            <div className="field">
+              <label>Gender</label>
+              <select
+                className="filter-select"
+                style={{ width: '100%' }}
+                value={addForm.gender}
+                onChange={(e) => setAddForm({ ...addForm, gender: e.target.value })}
+              >
+                <option value="">Select…</option>
+                {GENDER_OPTIONS.map((g) => (
+                  <option key={g} value={g}>
+                    {titleCase(g)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label>Age range</label>
+              <select
+                className="filter-select"
+                style={{ width: '100%' }}
+                value={addForm.age_range}
+                onChange={(e) => setAddForm({ ...addForm, age_range: e.target.value })}
+              >
+                <option value="">Select…</option>
+                {AGE_RANGE_OPTIONS.map((a) => (
+                  <option key={a} value={a}>
+                    {a}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label>Country</label>
+              <input
+                value={addForm.country}
+                placeholder="Zambia"
+                onChange={(e) => setAddForm({ ...addForm, country: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label>T-shirt size</label>
+              <select
+                className="filter-select"
+                style={{ width: '100%' }}
+                value={addForm.tshirt_size}
+                onChange={(e) => setAddForm({ ...addForm, tshirt_size: e.target.value })}
+              >
+                <option value="">Select…</option>
+                {TSHIRT_SIZE_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label>Attendance type</label>
+              <select
+                className="filter-select"
+                style={{ width: '100%' }}
+                value={addForm.attendance_type}
+                onChange={(e) => setAddForm({ ...addForm, attendance_type: e.target.value })}
+              >
+                <option value="">Select…</option>
+                {ATTENDANCE_TYPE_OPTIONS.map((a) => (
+                  <option key={a.value} value={a.value}>
+                    {a.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label>Club / institution</label>
+              <input
+                value={addForm.club_or_institution}
+                onChange={(e) => setAddForm({ ...addForm, club_or_institution: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label>Emergency contact name</label>
+              <input
+                value={addForm.emergency_contact_name}
+                onChange={(e) => setAddForm({ ...addForm, emergency_contact_name: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label>Emergency contact phone</label>
+              <input
+                value={addForm.emergency_contact_phone}
+                onChange={(e) => setAddForm({ ...addForm, emergency_contact_phone: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label>Medical notes</label>
+              <textarea
+                rows={3}
+                value={addForm.medical_notes}
+                onChange={(e) => setAddForm({ ...addForm, medical_notes: e.target.value })}
+              />
+            </div>
             <div className="modal-actions">
               <button className="btn" onClick={() => setAddOpen(false)}>
                 Cancel
@@ -431,7 +592,13 @@ export default function Registrations() {
               <button
                 className="btn btn-success"
                 onClick={handleAddPerson}
-                disabled={addBusy || !addForm.first_name || !addForm.last_name || !addForm.category_id}
+                disabled={
+                  addBusy ||
+                  !addForm.first_name ||
+                  !addForm.last_name ||
+                  !addForm.category_id ||
+                  !addForm.attendance_type
+                }
               >
                 {addBusy ? 'Saving…' : 'Register'}
               </button>

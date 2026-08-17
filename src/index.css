@@ -315,7 +315,7 @@ button {
 table.reg-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1100px;
+  min-width: 1260px;
 }
 
 table.reg-table thead th {
@@ -492,16 +492,20 @@ table.reg-table td.name {
   margin-bottom: 6px;
 }
 
-.field input {
+.field input,
+.field textarea {
   width: 100%;
   background: var(--bg-input);
   border: 1px solid var(--border-light);
   border-radius: 8px;
   padding: 10px 14px;
   outline: none;
+  font-family: inherit;
+  resize: vertical;
 }
 
-.field input:focus {
+.field input:focus,
+.field textarea:focus {
   border-color: var(--amber);
 }
 
