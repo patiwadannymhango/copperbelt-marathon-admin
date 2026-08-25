@@ -4,6 +4,7 @@ import HeaderNav from '../components/HeaderNav';
 import { titleCase, formatTime, registrationStatusLabel } from '../utils/format';
 import {
   createVendorManually,
+  downloadVendorExport,
   getVendorDashboard,
   getVendorFilterOptions,
   listVendorRegistrations,
@@ -37,6 +38,7 @@ export default function Vendors() {
 
   const [addOpen, setAddOpen] = useState(false);
   const [addBusy, setAddBusy] = useState(false);
+  const [exportBusy, setExportBusy] = useState(false);
   const [addForm, setAddForm] = useState({
     business_name: '',
     contact_first_name: '',
@@ -154,6 +156,26 @@ export default function Vendors() {
     }
   }
 
+  async function handleExport() {
+    setExportBusy(true);
+    setError('');
+    try {
+      const blob = await downloadVendorExport();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'vendor-registrations.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Export failed.');
+    } finally {
+      setExportBusy(false);
+    }
+  }
+
   const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
   return (
@@ -176,6 +198,9 @@ export default function Vendors() {
           </button>
           <button className="btn btn-success" onClick={() => setAddOpen(true)}>
             + Add Vendor
+          </button>
+          <button className="btn btn-amber" onClick={handleExport} disabled={exportBusy}>
+            {exportBusy ? 'Exporting…' : '↓ Export Excel'}
           </button>
           <button className="btn" onClick={logout}>
             Log out
