@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { apiFetch, apiFetchBlob } from './client';
 
 // Vendor/exhibitor registration is a separate Event from the runner
 // registration (see backend seed_vendor_registration) — a RegistrationForm
@@ -117,4 +117,8 @@ export async function createVendorManually(payload: {
     `/api/v1/registrations/admin/events/${VENDOR_EVENT_ID}/registrations/create/`,
     { method: 'POST', body: payload }
   );
+}
+
+export async function downloadVendorExport(): Promise<Blob> {
+  return apiFetchBlob(`/api/v1/registrations/admin/events/${VENDOR_EVENT_ID}/registrations/export/`);
 }
