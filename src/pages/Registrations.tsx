@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import HeaderNav from '../components/HeaderNav';
+import { titleCase, formatTime, registrationStatusLabel } from '../utils/format';
 import {
   createRegistrationManually,
   downloadExport,
@@ -15,18 +17,6 @@ import {
 const PAGE_SIZE = 25;
 const REFRESH_INTERVAL_MS = 30000;
 
-function titleCase(value?: string) {
-  if (!value) return '';
-  return value
-    .split(/[\s_-]+/)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(value.includes('-') ? '-' : ' ');
-}
-
-function formatTime(d: Date) {
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-}
-
 // Matches the public registration form's exact field options/values, so an
 // admin-entered registration validates the same way a public one does.
 const GENDER_OPTIONS = ['male', 'female'];
@@ -36,15 +26,6 @@ const ATTENDANCE_TYPE_OPTIONS: { value: string; label: string }[] = [
   { value: 'in-person', label: 'In-person' },
   { value: 'virtual', label: 'Virtual' },
 ];
-
-// Collapses the backend's 8 statuses down to the 4 buckets the admin cares
-// about at a glance.
-function registrationStatusLabel(status: string): 'Confirmed' | 'Reserved' | 'Unconfirmed' | 'Exempted' {
-  if (status === 'CONFIRMED') return 'Confirmed';
-  if (status === 'RESERVED') return 'Reserved';
-  if (status === 'CANCELLED' || status === 'EXPIRED' || status === 'REFUNDED') return 'Exempted';
-  return 'Unconfirmed';
-}
 
 // function LogoBadge() {
 //   return (
@@ -242,6 +223,7 @@ export default function Registrations() {
             <p className="eyebrow">COPPERBELT MARATHON 2026</p>
             <h1>Registrations</h1>
           </div>
+          <HeaderNav />
         </div>
         <div className="header-right">
           <span className="live-indicator">
