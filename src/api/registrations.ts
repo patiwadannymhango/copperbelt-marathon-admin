@@ -126,6 +126,36 @@ export async function createRegistrationManually(payload: {
   );
 }
 
+export async function deleteRegistration(id: string): Promise<void> {
+  await apiFetch<void>(`/api/v1/registrations/admin/registrations/${id}/`, { method: 'DELETE' });
+}
+
+// Same field set as the manual "Add person" form, minus email — the
+// backend rejects the whole request outright if an "email" key is
+// present at all, so this is never even offered as an option here.
+export async function updateRegistrationDetails(
+  id: string,
+  payload: {
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    gender?: string;
+    age_range?: string;
+    country?: string;
+    tshirt_size?: string;
+    attendance_type?: string;
+    club_or_institution?: string;
+    emergency_contact_name?: string;
+    emergency_contact_phone?: string;
+    medical_notes?: string;
+  }
+): Promise<AdminRegistration> {
+  return apiFetch<AdminRegistration>(
+    `/api/v1/registrations/admin/registrations/${id}/details/`,
+    { method: 'PATCH', body: payload }
+  );
+}
+
 // The export endpoint requires the same Bearer auth as everything else, so
 // it can't just be an <a href> like a public download link — fetched as a
 // blob and saved client-side instead (see Registrations.tsx).
