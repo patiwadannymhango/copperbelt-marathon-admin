@@ -586,7 +586,8 @@ table.reg-table td.name {
 /* ---------- Bulk upload ---------- */
 
 .modal-card--wide {
-  max-width: min(1180px, 95vw);
+  max-width: min(1600px, 97vw);
+  max-height: 94vh;
 }
 
 .bulk-intro {
@@ -647,7 +648,7 @@ table.reg-table td.name {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: auto;
-  max-height: 46vh;
+  max-height: 62vh;
   margin-bottom: 14px;
 }
 
