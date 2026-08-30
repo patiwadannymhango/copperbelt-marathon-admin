@@ -654,7 +654,12 @@ table.reg-table td.name {
 table.bulk-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 980px;
+  min-width: 2100px;
+}
+
+table.bulk-table td input,
+table.bulk-table td select {
+  min-width: 90px;
 }
 
 table.bulk-table thead th {

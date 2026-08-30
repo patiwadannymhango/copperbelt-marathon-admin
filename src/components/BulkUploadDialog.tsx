@@ -10,6 +10,7 @@ import {
 } from '../api/registrations';
 import { downloadCategoryGuide } from '../utils/categoryGuide';
 import { validateRows } from '../utils/bulkUploadValidation';
+import { GENDER_OPTIONS, AGE_RANGE_OPTIONS, TSHIRT_SIZE_OPTIONS, ATTENDANCE_TYPE_OPTIONS } from '../utils/formOptions';
 
 interface BulkUploadDialogProps {
   open: boolean;
@@ -121,7 +122,7 @@ export default function BulkUploadDialog({ open, onClose, categories, onUploaded
                 ↓ Download Excel template
               </button>
               <button className="btn" onClick={() => downloadCategoryGuide(categories)}>
-                ↓ Download category code guide (PDF)
+                ↓ Download field & category guide (PDF)
               </button>
             </div>
 
@@ -179,6 +180,15 @@ export default function BulkUploadDialog({ open, onClose, categories, onUploaded
                     <th>Phone</th>
                     <th>Category</th>
                     <th>Status</th>
+                    <th>Gender</th>
+                    <th>Age range</th>
+                    <th>Country</th>
+                    <th>T-shirt size</th>
+                    <th>Attendance</th>
+                    <th>Club / institution</th>
+                    <th>Emergency contact name</th>
+                    <th>Emergency contact phone</th>
+                    <th>Medical notes</th>
                     <th>Issues</th>
                     <th></th>
                   </tr>
@@ -237,6 +247,88 @@ export default function BulkUploadDialog({ open, onClose, categories, onUploaded
                               </option>
                             ))}
                           </select>
+                        </td>
+                        <td>
+                          <select
+                            value={row.gender || ''}
+                            onChange={(e) => updateRow(index, { gender: e.target.value })}
+                          >
+                            <option value="">—</option>
+                            {GENDER_OPTIONS.map((g) => (
+                              <option key={g} value={g}>
+                                {g}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td>
+                          <select
+                            value={row.age_range || ''}
+                            onChange={(e) => updateRow(index, { age_range: e.target.value })}
+                          >
+                            <option value="">—</option>
+                            {AGE_RANGE_OPTIONS.map((a) => (
+                              <option key={a} value={a}>
+                                {a}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td>
+                          <input
+                            value={row.country || ''}
+                            onChange={(e) => updateRow(index, { country: e.target.value })}
+                          />
+                        </td>
+                        <td>
+                          <select
+                            value={row.tshirt_size || ''}
+                            onChange={(e) => updateRow(index, { tshirt_size: e.target.value })}
+                          >
+                            <option value="">—</option>
+                            {TSHIRT_SIZE_OPTIONS.map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td>
+                          <select
+                            value={row.attendance_type || ''}
+                            onChange={(e) => updateRow(index, { attendance_type: e.target.value })}
+                          >
+                            <option value="">—</option>
+                            {ATTENDANCE_TYPE_OPTIONS.map((a) => (
+                              <option key={a.value} value={a.value}>
+                                {a.label}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td>
+                          <input
+                            value={row.club_or_institution || ''}
+                            onChange={(e) => updateRow(index, { club_or_institution: e.target.value })}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            value={row.emergency_contact_name || ''}
+                            onChange={(e) => updateRow(index, { emergency_contact_name: e.target.value })}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            value={row.emergency_contact_phone || ''}
+                            onChange={(e) => updateRow(index, { emergency_contact_phone: e.target.value })}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            value={row.medical_notes || ''}
+                            onChange={(e) => updateRow(index, { medical_notes: e.target.value })}
+                          />
                         </td>
                         <td style={{ minWidth: 180 }}>
                           {v.errors.length === 0 && v.warnings.length === 0 && (

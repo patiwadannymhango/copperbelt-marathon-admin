@@ -14,19 +14,15 @@ import {
   type DashboardStats,
   type FilterOptions,
 } from '../api/registrations';
+import {
+  GENDER_OPTIONS,
+  AGE_RANGE_OPTIONS,
+  TSHIRT_SIZE_OPTIONS,
+  ATTENDANCE_TYPE_OPTIONS,
+} from '../utils/formOptions';
 
 const PAGE_SIZE = 25;
 const REFRESH_INTERVAL_MS = 30000;
-
-// Matches the public registration form's exact field options/values, so an
-// admin-entered registration validates the same way a public one does.
-const GENDER_OPTIONS = ['male', 'female'];
-const AGE_RANGE_OPTIONS = ['Under 18', '18-29', '30-39', '40-49', '50-59', '60+'];
-const TSHIRT_SIZE_OPTIONS = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL'];
-const ATTENDANCE_TYPE_OPTIONS: { value: string; label: string }[] = [
-  { value: 'in-person', label: 'In-person' },
-  { value: 'virtual', label: 'Virtual' },
-];
 
 // function LogoBadge() {
 //   return (

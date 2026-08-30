@@ -1,5 +1,6 @@
 import type { BulkUploadRow, CategoryOption } from '../api/registrations';
 import { STATUS_OPTIONS } from '../api/registrations';
+import { GENDER_OPTIONS, AGE_RANGE_OPTIONS, TSHIRT_SIZE_OPTIONS, ATTENDANCE_TYPE_OPTIONS } from './formOptions';
 
 // Mirrors the backend's row-validation rules (apps/registrations/views.py,
 // AdminRegistrationBulkUploadView._process_rows) so edits in the review
@@ -9,6 +10,16 @@ import { STATUS_OPTIONS } from '../api/registrations';
 
 const REQUIRED_FIELDS: (keyof BulkUploadRow)[] = ['first_name', 'last_name', 'category_code'];
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+// Only fields with a fixed set of valid values get a (non-blocking)
+// warning on mismatch — the rest (country, club, emergency contact,
+// medical notes) are free text.
+const KNOWN_VALUES: Record<string, string[]> = {
+  gender: GENDER_OPTIONS,
+  age_range: AGE_RANGE_OPTIONS,
+  tshirt_size: TSHIRT_SIZE_OPTIONS,
+  attendance_type: ATTENDANCE_TYPE_OPTIONS.map((o) => o.value),
+};
 
 export interface RowValidation {
   errors: string[];
@@ -44,6 +55,13 @@ export function validateRows(rows: BulkUploadRow[], categories: CategoryOption[]
         } else {
           seenEmails.set(key, displayRow);
         }
+      }
+    }
+
+    for (const [field, known] of Object.entries(KNOWN_VALUES)) {
+      const value = (row[field] || '').trim();
+      if (value && !known.includes(value)) {
+        warnings.push(`'${value}' isn't one of the usual ${field} values (${known.join(', ')}) — check spelling/casing`);
       }
     }
 

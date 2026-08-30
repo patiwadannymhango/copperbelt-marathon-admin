@@ -142,6 +142,17 @@ export interface BulkUploadRow {
   phone?: string;
   category_code?: string;
   status?: string;
+  // Same optional extra fields as the manual "Add person" form — all
+  // stored in form_data.
+  gender?: string;
+  age_range?: string;
+  country?: string;
+  tshirt_size?: string;
+  attendance_type?: string;
+  club_or_institution?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  medical_notes?: string;
   [key: string]: string | undefined;
 }
 
