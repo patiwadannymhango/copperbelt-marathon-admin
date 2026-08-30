@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import HeaderNav from '../components/HeaderNav';
+import BulkUploadDialog from '../components/BulkUploadDialog';
 import { titleCase, formatTime, registrationStatusLabel } from '../utils/format';
 import {
   createRegistrationManually,
@@ -75,6 +76,7 @@ export default function Registrations() {
     status: 'CONFIRMED',
   });
   const [exportBusy, setExportBusy] = useState(false);
+  const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
 
   const load = useCallback(
     (silent = false) => {
@@ -235,6 +237,9 @@ export default function Registrations() {
           </button>
           <button className="btn btn-success" onClick={() => setAddOpen(true)}>
             + Add Person
+          </button>
+          <button className="btn" onClick={() => setBulkUploadOpen(true)}>
+            ⇧ Bulk upload
           </button>
           <button className="btn btn-amber" onClick={handleExport} disabled={exportBusy}>
             {exportBusy ? 'Exporting…' : '↓ Export Excel'}
@@ -605,6 +610,16 @@ export default function Registrations() {
           </div>
         </div>
       )}
+
+      <BulkUploadDialog
+        open={bulkUploadOpen}
+        onClose={() => setBulkUploadOpen(false)}
+        categories={filterOptions?.categories ?? []}
+        onUploaded={() => {
+          load();
+          loadStats();
+        }}
+      />
     </div>
   );
 }
