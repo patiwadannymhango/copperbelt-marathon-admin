@@ -114,6 +114,35 @@ export async function getFilterOptions(): Promise<FilterOptions> {
   return apiFetch(`/api/v1/registrations/admin/events/${EVENT_ID}/registrations/filters/`);
 }
 
+// --- Progress summary ---------------------------------------------------
+// Read-only aggregate counts (never touches individual records) powering
+// the Summary page: total registrations, a per-category status
+// breakdown, and an overall t-shirt size breakdown.
+
+export interface CategorySummary {
+  category_id: string;
+  category_name: string;
+  category_code: string;
+  capacity: number | null;
+  total: number;
+  by_status: { status: string; count: number }[];
+}
+
+export interface TshirtSizeCount {
+  size: string;
+  count: number;
+}
+
+export interface RegistrationSummary {
+  total_registrations: number;
+  by_category: CategorySummary[];
+  by_tshirt_size: TshirtSizeCount[];
+}
+
+export async function getRegistrationSummary(): Promise<RegistrationSummary> {
+  return apiFetch(`/api/v1/registrations/admin/events/${EVENT_ID}/registrations/summary/`);
+}
+
 export async function createRegistrationManually(payload: {
   category_id: string;
   participant: Record<string, string>;

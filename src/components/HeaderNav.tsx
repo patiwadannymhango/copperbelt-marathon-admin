@@ -9,6 +9,9 @@ export default function HeaderNav() {
       <NavLink to="/vendors" className={({ isActive }) => (isActive ? 'nav-tab active' : 'nav-tab')}>
         Vendors
       </NavLink>
+      <NavLink to="/summary" className={({ isActive }) => (isActive ? 'nav-tab active' : 'nav-tab')}>
+        Summary
+      </NavLink>
     </nav>
   );
 }

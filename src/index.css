@@ -800,3 +800,69 @@ table.bulk-table td.row-index {
 .row-remove-btn:hover {
   color: var(--red);
 }
+
+/* ---------- Summary page ---------- */
+
+.summary-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 16px 16px 0;
+}
+
+table.summary-table {
+  min-width: 0;
+}
+
+table.summary-table tfoot td {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  border-bottom: none;
+  font-size: 12.5px;
+}
+
+.num-confirmed {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.num-pending,
+.num-reserved {
+  color: var(--amber);
+  font-weight: 700;
+}
+
+.tshirt-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px;
+}
+
+.tshirt-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
+}
+
+.tshirt-chip .tshirt-size {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+
+.tshirt-chip .tshirt-count {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.summary-footnote {
+  padding: 0 16px 16px;
+  font-size: 11px;
+  color: var(--text-faint);
+}

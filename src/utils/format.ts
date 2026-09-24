@@ -20,3 +20,14 @@ export function registrationStatusLabel(
   if (status === 'CANCELLED' || status === 'EXPIRED' || status === 'REFUNDED') return 'Exempted';
   return 'Unconfirmed';
 }
+
+// Same 4-bucket convention as registrationStatusLabel above, applied to a
+// {status, count}[] breakdown (e.g. from the summary endpoint's
+// per-category by_status) instead of a single registration's status.
+export function bucketStatusCounts(byStatus: { status: string; count: number }[]) {
+  const buckets = { Confirmed: 0, Reserved: 0, Unconfirmed: 0, Exempted: 0 };
+  for (const { status, count } of byStatus) {
+    buckets[registrationStatusLabel(status)] += count;
+  }
+  return buckets;
+}

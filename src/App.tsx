@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Registrations from './pages/Registrations';
 import Vendors from './pages/Vendors';
+import Summary from './pages/Summary';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { authenticated } = useAuth();
@@ -29,6 +30,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Vendors />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/summary"
+            element={
+              <ProtectedRoute>
+                <Summary />
               </ProtectedRoute>
             }
           />
