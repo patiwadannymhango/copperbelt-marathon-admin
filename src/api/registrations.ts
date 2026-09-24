@@ -117,7 +117,7 @@ export async function getFilterOptions(): Promise<FilterOptions> {
 // --- Progress summary ---------------------------------------------------
 // Read-only aggregate counts (never touches individual records) powering
 // the Summary page: total registrations, a per-category status
-// breakdown, and an overall t-shirt size breakdown.
+// breakdown, and overall t-shirt size and gender breakdowns.
 
 export interface CategorySummary {
   category_id: string;
@@ -133,10 +133,16 @@ export interface TshirtSizeCount {
   count: number;
 }
 
+export interface GenderCount {
+  gender: string;
+  count: number;
+}
+
 export interface RegistrationSummary {
   total_registrations: number;
   by_category: CategorySummary[];
   by_tshirt_size: TshirtSizeCount[];
+  by_gender: GenderCount[];
 }
 
 export async function getRegistrationSummary(): Promise<RegistrationSummary> {

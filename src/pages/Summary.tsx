@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import HeaderNav from '../components/HeaderNav';
-import { formatTime, bucketStatusCounts } from '../utils/format';
-import { TSHIRT_SIZE_OPTIONS } from '../utils/formOptions';
+import { formatTime, bucketStatusCounts, titleCase } from '../utils/format';
+import { TSHIRT_SIZE_OPTIONS, GENDER_OPTIONS } from '../utils/formOptions';
 import { getRegistrationSummary, type RegistrationSummary } from '../api/registrations';
 
 const REFRESH_INTERVAL_MS = 30000;
@@ -57,6 +57,20 @@ export default function Summary() {
       })
     : [];
   const tshirtTotal = tshirtRows.reduce((sum, t) => sum + t.count, 0);
+
+  const genderRows = summary
+    ? [...summary.by_gender].sort((a, b) => {
+        if (!a.gender) return 1;
+        if (!b.gender) return -1;
+        const ai = GENDER_OPTIONS.indexOf(a.gender);
+        const bi = GENDER_OPTIONS.indexOf(b.gender);
+        if (ai === -1 && bi === -1) return a.gender.localeCompare(b.gender);
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
+      })
+    : [];
+  const genderTotal = genderRows.reduce((sum, g) => sum + g.count, 0);
 
   return (
     <div className="page">
@@ -179,6 +193,22 @@ export default function Summary() {
             </div>
             {tshirtRows.length > 0 && (
               <p className="summary-footnote">{tshirtTotal} total across all sizes.</p>
+            )}
+          </div>
+
+          <div className="table-card" style={{ marginTop: 18 }}>
+            <div className="summary-section-title">Gender</div>
+            <div className="tshirt-grid">
+              {genderRows.map((g) => (
+                <div className="tshirt-chip" key={g.gender || 'unspecified'}>
+                  <span className="tshirt-size">{g.gender ? titleCase(g.gender) : 'Not specified'}</span>
+                  <span className="tshirt-count">{g.count}</span>
+                </div>
+              ))}
+              {genderRows.length === 0 && <p className="dim">No gender recorded yet.</p>}
+            </div>
+            {genderRows.length > 0 && (
+              <p className="summary-footnote">{genderTotal} total.</p>
             )}
           </div>
         </>
