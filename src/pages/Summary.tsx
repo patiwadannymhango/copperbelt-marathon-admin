@@ -8,6 +8,21 @@ import { getRegistrationSummary, type RegistrationSummary } from '../api/registr
 const REFRESH_INTERVAL_MS = 30000;
 const SOURCE_ORDER = ['PUBLIC', 'ADMIN', 'LENCO_MIGRATION', 'UNKNOWN'];
 
+// Display-only relabeling for the "By race category" table — the
+// distance is spelled out here specifically because that's what makes
+// the category recognizable at a glance on this page. The underlying
+// category name (used everywhere else: Registrations, the public form,
+// bulk-upload templates) is untouched.
+const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
+  'Full Marathon': '42 KM - Full Marathon',
+  'Half Marathon': '21KM - Half Marathon',
+  'Fun Run & Walk': '5KM Fun Run & Walk',
+};
+
+function categoryDisplayName(name: string): string {
+  return CATEGORY_DISPLAY_NAMES[name] || name;
+}
+
 // Read-only progress view — total registrations, a per-race-category
 // breakdown (confirmed / awaiting-pending / reserved / exempted), and a
 // t-shirt size breakdown. Never creates, edits, or deletes a record; it
@@ -174,7 +189,7 @@ export default function Summary() {
                     const pct = cat.capacity ? Math.round((cat.total / cat.capacity) * 100) : null;
                     return (
                       <tr key={cat.category_id}>
-                        <td className="name">{cat.category_name}</td>
+                        <td className="name">{categoryDisplayName(cat.category_name)}</td>
                         <td className="num-confirmed">{b.Confirmed}</td>
                         <td className="num-pending">{b.Unconfirmed}</td>
                         <td className="num-reserved">{b.Reserved}</td>
