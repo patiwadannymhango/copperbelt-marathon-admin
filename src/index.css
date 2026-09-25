@@ -838,6 +838,11 @@ table.summary-table tfoot td {
   font-weight: 700;
 }
 
+.num-lenco {
+  color: var(--amber);
+  font-weight: 700;
+}
+
 .tshirt-grid {
   display: flex;
   flex-wrap: wrap;
@@ -866,6 +871,16 @@ table.summary-table tfoot td {
   font-size: 14px;
   font-weight: 700;
   color: var(--text);
+}
+
+.tshirt-chip .tshirt-lenco {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--amber);
+  background: rgba(226, 149, 79, 0.12);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
 }
 
 .tshirt-chip-highlight {

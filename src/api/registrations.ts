@@ -129,17 +129,20 @@ export interface CategorySummary {
   category_code: string;
   capacity: number | null;
   total: number;
+  lenco_count: number;
   by_status: { status: string; count: number }[];
 }
 
 export interface TshirtSizeCount {
   size: string;
   count: number;
+  lenco_count: number;
 }
 
 export interface GenderCount {
   gender: string;
   count: number;
+  lenco_count: number;
 }
 
 export interface SourceCount {

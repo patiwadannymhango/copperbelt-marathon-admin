@@ -164,6 +164,7 @@ export default function Summary() {
                     <th>Reserved</th>
                     <th>Exempted</th>
                     <th>Total</th>
+                    <th>From Lenco</th>
                     <th>Capacity</th>
                   </tr>
                 </thead>
@@ -179,6 +180,7 @@ export default function Summary() {
                         <td className="num-reserved">{b.Reserved}</td>
                         <td className="dim">{b.Exempted || '—'}</td>
                         <td className="name">{cat.total}</td>
+                        <td className={cat.lenco_count ? 'num-lenco' : 'dim'}>{cat.lenco_count || '—'}</td>
                         <td className={cat.capacity ? '' : 'dim'}>
                           {cat.capacity ? `${cat.total} / ${cat.capacity} (${pct}%)` : '—'}
                         </td>
@@ -194,6 +196,7 @@ export default function Summary() {
                     <td className="num-reserved">{overall.Reserved}</td>
                     <td className="dim">{overall.Exempted || '—'}</td>
                     <td className="name">{summary.total_registrations}</td>
+                    <td className="num-lenco">{lencoCount || '—'}</td>
                     <td></td>
                   </tr>
                 </tfoot>
@@ -208,6 +211,7 @@ export default function Summary() {
                 <div className="tshirt-chip" key={t.size || 'unspecified'}>
                   <span className="tshirt-size">{t.size || 'Not specified'}</span>
                   <span className="tshirt-count">{t.count}</span>
+                  {t.lenco_count > 0 && <span className="tshirt-lenco">{t.lenco_count} Lenco</span>}
                 </div>
               ))}
               {tshirtRows.length === 0 && <p className="dim">No sizes recorded yet.</p>}
@@ -224,6 +228,7 @@ export default function Summary() {
                 <div className="tshirt-chip" key={g.gender || 'unspecified'}>
                   <span className="tshirt-size">{g.gender ? titleCase(g.gender) : 'Not specified'}</span>
                   <span className="tshirt-count">{g.count}</span>
+                  {g.lenco_count > 0 && <span className="tshirt-lenco">{g.lenco_count} Lenco</span>}
                 </div>
               ))}
               {genderRows.length === 0 && <p className="dim">No gender recorded yet.</p>}
