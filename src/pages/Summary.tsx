@@ -84,6 +84,7 @@ export default function Summary() {
       })
     : [];
   const sourceTotal = sourceRows.reduce((sum, s) => sum + s.count, 0);
+  const lencoCount = sourceRows.find((s) => s.source === 'LENCO_MIGRATION')?.count ?? 0;
 
   return (
     <div className="page">
@@ -140,6 +141,13 @@ export default function Summary() {
                 <p className="stat-label">EXEMPTED</p>
                 <p className="stat-value">{overall.Exempted}</p>
                 <p className="stat-sub">cancelled | expired | refunded</p>
+              </div>
+            )}
+            {lencoCount > 0 && (
+              <div className="stat-card highlight">
+                <p className="stat-label">FROM LENCO</p>
+                <p className="stat-value">{lencoCount}</p>
+                <p className="stat-sub">migrated — excluded from Registrations</p>
               </div>
             )}
           </div>

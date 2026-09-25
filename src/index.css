@@ -320,6 +320,13 @@ button {
 .stat-card.revenue .stat-value {
   color: var(--amber);
 }
+.stat-card.highlight {
+  background: rgba(226, 149, 79, 0.08);
+  border-color: rgba(226, 149, 79, 0.4);
+}
+.stat-card.highlight .stat-value {
+  color: var(--amber);
+}
 
 /* ---------- Filters ---------- */
 
