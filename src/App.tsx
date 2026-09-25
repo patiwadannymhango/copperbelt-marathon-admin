@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Registrations from './pages/Registrations';
 import Vendors from './pages/Vendors';
 import Summary from './pages/Summary';
+import LencoRecords from './pages/LencoRecords';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { authenticated } = useAuth();
@@ -38,6 +39,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Summary />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lenco-records"
+            element={
+              <ProtectedRoute>
+                <LencoRecords />
               </ProtectedRoute>
             }
           />

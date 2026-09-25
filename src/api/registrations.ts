@@ -35,6 +35,8 @@ export interface AdminRegistration {
   event: string;
   event_name: string;
   form_data: RegistrationFormData;
+  created_via: string;
+  created_via_display: string;
   registered_at: string;
   updated_at: string;
 }
@@ -92,6 +94,7 @@ export async function listRegistrations(params: {
   gender?: string;
   organisation?: string;
   attendance_type?: string;
+  created_via?: string;
   ordering?: string;
   page?: number;
 }): Promise<Paginated<AdminRegistration>> {
@@ -102,6 +105,7 @@ export async function listRegistrations(params: {
   if (params.gender) qs.set('gender', params.gender);
   if (params.organisation) qs.set('organisation', params.organisation);
   if (params.attendance_type) qs.set('attendance_type', params.attendance_type);
+  if (params.created_via) qs.set('created_via', params.created_via);
   if (params.ordering) qs.set('ordering', params.ordering);
   if (params.page) qs.set('page', String(params.page));
 
@@ -193,9 +197,12 @@ export async function updateRegistrationDetails(
 
 // The export endpoint requires the same Bearer auth as everything else, so
 // it can't just be an <a href> like a public download link — fetched as a
-// blob and saved client-side instead (see Registrations.tsx).
-export async function downloadExport(): Promise<Blob> {
-  return apiFetchBlob(`/api/v1/registrations/admin/events/${EVENT_ID}/registrations/export/`);
+// blob and saved client-side instead (see Registrations.tsx). An optional
+// createdVia scopes it to one source (e.g. Lenco Records exporting just
+// its own rows) instead of every registration for the event.
+export async function downloadExport(createdVia?: string): Promise<Blob> {
+  const qs = createdVia ? `?created_via=${encodeURIComponent(createdVia)}` : '';
+  return apiFetchBlob(`/api/v1/registrations/admin/events/${EVENT_ID}/registrations/export/${qs}`);
 }
 
 // --- Bulk upload -----------------------------------------------------

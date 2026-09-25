@@ -12,6 +12,9 @@ export default function HeaderNav() {
       <NavLink to="/summary" className={({ isActive }) => (isActive ? 'nav-tab active' : 'nav-tab')}>
         Summary
       </NavLink>
+      <NavLink to="/lenco-records" className={({ isActive }) => (isActive ? 'nav-tab active' : 'nav-tab')}>
+        Lenco Records
+      </NavLink>
     </nav>
   );
 }
