@@ -861,6 +861,16 @@ table.summary-table tfoot td {
   color: var(--text);
 }
 
+.tshirt-chip-highlight {
+  background: rgba(226, 149, 79, 0.08);
+  border-color: rgba(226, 149, 79, 0.4);
+}
+
+.tshirt-chip-highlight .tshirt-size,
+.tshirt-chip-highlight .tshirt-count {
+  color: var(--amber);
+}
+
 .summary-footnote {
   padding: 0 16px 16px;
   font-size: 11px;

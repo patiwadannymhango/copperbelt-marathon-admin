@@ -6,6 +6,7 @@ import { TSHIRT_SIZE_OPTIONS, GENDER_OPTIONS } from '../utils/formOptions';
 import { getRegistrationSummary, type RegistrationSummary } from '../api/registrations';
 
 const REFRESH_INTERVAL_MS = 30000;
+const SOURCE_ORDER = ['PUBLIC', 'ADMIN', 'LENCO_MIGRATION', 'UNKNOWN'];
 
 // Read-only progress view — total registrations, a per-race-category
 // breakdown (confirmed / awaiting-pending / reserved / exempted), and a
@@ -72,6 +73,18 @@ export default function Summary() {
     : [];
   const genderTotal = genderRows.reduce((sum, g) => sum + g.count, 0);
 
+  const sourceRows = summary
+    ? [...summary.by_source].sort((a, b) => {
+        const ai = SOURCE_ORDER.indexOf(a.source);
+        const bi = SOURCE_ORDER.indexOf(b.source);
+        if (ai === -1 && bi === -1) return a.source_display.localeCompare(b.source_display);
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
+      })
+    : [];
+  const sourceTotal = sourceRows.reduce((sum, s) => sum + s.count, 0);
+
   return (
     <div className="page">
       <div className="header">
@@ -105,7 +118,7 @@ export default function Summary() {
             <div className="stat-card">
               <p className="stat-label">TOTAL</p>
               <p className="stat-value">{summary.total_registrations}</p>
-              <p className="stat-sub">registrations</p>
+              <p className="stat-sub">registrations (incl. Lenco records)</p>
             </div>
             <div className="stat-card paid">
               <p className="stat-label">CONFIRMED</p>
@@ -209,6 +222,28 @@ export default function Summary() {
             </div>
             {genderRows.length > 0 && (
               <p className="summary-footnote">{genderTotal} total.</p>
+            )}
+          </div>
+
+          <div className="table-card" style={{ marginTop: 18 }}>
+            <div className="summary-section-title">Source</div>
+            <div className="tshirt-grid">
+              {sourceRows.map((s) => (
+                <div
+                  className={s.source === 'LENCO_MIGRATION' ? 'tshirt-chip tshirt-chip-highlight' : 'tshirt-chip'}
+                  key={s.source}
+                >
+                  <span className="tshirt-size">{s.source_display}</span>
+                  <span className="tshirt-count">{s.count}</span>
+                </div>
+              ))}
+              {sourceRows.length === 0 && <p className="dim">No records yet.</p>}
+            </div>
+            {sourceRows.length > 0 && (
+              <p className="summary-footnote">
+                {sourceTotal} total — the Registrations page excludes Lenco records from its own
+                counts; they're still managed from the "Lenco Records" section.
+              </p>
             )}
           </div>
         </>

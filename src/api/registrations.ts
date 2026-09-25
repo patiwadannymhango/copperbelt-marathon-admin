@@ -142,11 +142,18 @@ export interface GenderCount {
   count: number;
 }
 
+export interface SourceCount {
+  source: string;
+  source_display: string;
+  count: number;
+}
+
 export interface RegistrationSummary {
   total_registrations: number;
   by_category: CategorySummary[];
   by_tshirt_size: TshirtSizeCount[];
   by_gender: GenderCount[];
+  by_source: SourceCount[];
 }
 
 export async function getRegistrationSummary(): Promise<RegistrationSummary> {
