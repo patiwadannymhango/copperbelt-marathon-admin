@@ -838,9 +838,17 @@ table.summary-table tfoot td {
   font-weight: 700;
 }
 
-.num-lenco {
+.lenco-badge {
+  display: inline-flex;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(226, 149, 79, 0.4);
+  background: rgba(226, 149, 79, 0.1);
   color: var(--amber);
-  font-weight: 700;
+  white-space: nowrap;
 }
 
 .tshirt-grid {
@@ -873,15 +881,6 @@ table.summary-table tfoot td {
   color: var(--text);
 }
 
-.tshirt-chip .tshirt-lenco {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--amber);
-  background: rgba(226, 149, 79, 0.12);
-  padding: 2px 7px;
-  border-radius: var(--radius-pill);
-  white-space: nowrap;
-}
 
 .tshirt-chip-highlight {
   background: rgba(226, 149, 79, 0.08);
