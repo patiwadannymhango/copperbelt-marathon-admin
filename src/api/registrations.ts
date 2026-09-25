@@ -1,4 +1,5 @@
 import { apiFetch, apiFetchBlob, EVENT_ID } from './client';
+import type { BulkResendReport } from '../utils/bulkResend';
 
 export interface Participant {
   id: string;
@@ -111,6 +112,45 @@ export async function listRegistrations(params: {
 
   return apiFetch(
     `/api/v1/registrations/admin/events/${EVENT_ID}/registrations/?${qs.toString()}`
+  );
+}
+
+// Same filters as listRegistrations, but every matching id with no
+// pagination — powers "select all N matching results" for the bulk
+// resend action, since the table only ever has one page loaded.
+export async function fetchAllRegistrationIds(params: {
+  search?: string;
+  status?: string;
+  category?: string;
+  gender?: string;
+  organisation?: string;
+  attendance_type?: string;
+  created_via?: string;
+}): Promise<{ ids: string[]; count: number }> {
+  const qs = new URLSearchParams();
+  if (params.search) qs.set('search', params.search);
+  if (params.status) qs.set('status', params.status);
+  if (params.category) qs.set('category', params.category);
+  if (params.gender) qs.set('gender', params.gender);
+  if (params.organisation) qs.set('organisation', params.organisation);
+  if (params.attendance_type) qs.set('attendance_type', params.attendance_type);
+  if (params.created_via) qs.set('created_via', params.created_via);
+
+  return apiFetch(
+    `/api/v1/registrations/admin/events/${EVENT_ID}/registrations/ids/?${qs.toString()}`
+  );
+}
+
+// Resends the "you're confirmed" email for each listed registration —
+// only ones that are actually Confirmed and have an email on file get
+// sent; the rest come back "skipped" in the report rather than failing
+// the whole call. Capped server-side at 15 ids per call (see the
+// backend view's docstring) — BulkResendBar splits a bigger selection
+// into several calls via resendInBatches.
+export async function resendConfirmationEmails(ids: string[]): Promise<BulkResendReport> {
+  return apiFetch(
+    `/api/v1/registrations/admin/events/${EVENT_ID}/registrations/resend-confirmation/`,
+    { method: 'POST', body: { registration_ids: ids } }
   );
 }
 

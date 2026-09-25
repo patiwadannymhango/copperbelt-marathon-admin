@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import HeaderNav from '../components/HeaderNav';
+import BulkResendBar from '../components/BulkResendBar';
 import { titleCase, formatTime, registrationStatusLabel } from '../utils/format';
 import {
   createVendorManually,
   downloadVendorExport,
+  fetchAllVendorIds,
   getVendorDashboard,
   getVendorFilterOptions,
   listVendorRegistrations,
+  resendVendorConfirmationEmails,
   REQUIREMENT_OPTIONS,
   STATUS_OPTIONS,
   type AdminVendorRegistration,
@@ -51,6 +54,8 @@ export default function Vendors() {
     requirement: '',
     status: 'CONFIRMED',
   });
+
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const load = useCallback(
     (silent = false) => {
@@ -176,6 +181,39 @@ export default function Vendors() {
     }
   }
 
+  function toggleRow(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  const pageIds = rows.map((r) => r.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.has(id));
+
+  function toggleAllOnPage() {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (allPageSelected) {
+        pageIds.forEach((id) => next.delete(id));
+      } else {
+        pageIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  }
+
+  async function handleSelectAllMatching() {
+    const { ids } = await fetchAllVendorIds({
+      search,
+      status: statusFilter,
+      category: categoryFilter,
+    });
+    setSelected(new Set(ids));
+  }
+
   const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
   return (
@@ -281,11 +319,31 @@ export default function Vendors() {
         </span>
       </div>
 
+      <BulkResendBar
+        selectedIds={[...selected]}
+        totalMatching={count}
+        allPageSelected={allPageSelected}
+        onSelectAllMatching={handleSelectAllMatching}
+        onClear={() => setSelected(new Set())}
+        resendFn={resendVendorConfirmationEmails}
+        onDone={load}
+        itemLabel="vendor registrations"
+      />
+
       <div className="table-card">
         <div className="table-scroll">
           <table className="reg-table">
             <thead>
               <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    className="row-checkbox"
+                    checked={allPageSelected}
+                    onChange={toggleAllOnPage}
+                    title="Select all on this page"
+                  />
+                </th>
                 <th>•</th>
                 <th>Reference</th>
                 <th>Business</th>
@@ -302,6 +360,14 @@ export default function Vendors() {
             <tbody>
               {rows.map((r, i) => (
                 <tr key={r.id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      className="row-checkbox"
+                      checked={selected.has(r.id)}
+                      onChange={() => toggleRow(r.id)}
+                    />
+                  </td>
                   <td className="dim">{(page - 1) * PAGE_SIZE + i + 1}</td>
                   <td>{r.registration_number}</td>
                   <td className="name">{r.form_data.business_name || '—'}</td>

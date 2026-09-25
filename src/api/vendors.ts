@@ -1,4 +1,5 @@
 import { apiFetch, apiFetchBlob } from './client';
+import type { BulkResendReport } from '../utils/bulkResend';
 
 // Vendor/exhibitor registration is a separate Event from the runner
 // registration (see backend seed_vendor_registration) — a RegistrationForm
@@ -100,6 +101,34 @@ export async function listVendorRegistrations(params: {
 
   return apiFetch(
     `/api/v1/registrations/admin/events/${VENDOR_EVENT_ID}/registrations/?${qs.toString()}`
+  );
+}
+
+// Same filters as listVendorRegistrations, but every matching id with
+// no pagination — powers "select all N matching results" for the bulk
+// resend action.
+export async function fetchAllVendorIds(params: {
+  search?: string;
+  status?: string;
+  category?: string;
+}): Promise<{ ids: string[]; count: number }> {
+  const qs = new URLSearchParams();
+  if (params.search) qs.set('search', params.search);
+  if (params.status) qs.set('status', params.status);
+  if (params.category) qs.set('category', params.category);
+
+  return apiFetch(
+    `/api/v1/registrations/admin/events/${VENDOR_EVENT_ID}/registrations/ids/?${qs.toString()}`
+  );
+}
+
+// Resends the "you're confirmed" email for each listed vendor
+// registration — same endpoint/behavior as the runner-event version
+// (see api/registrations.ts), just scoped to the vendor event.
+export async function resendVendorConfirmationEmails(ids: string[]): Promise<BulkResendReport> {
+  return apiFetch(
+    `/api/v1/registrations/admin/events/${VENDOR_EVENT_ID}/registrations/resend-confirmation/`,
+    { method: 'POST', body: { registration_ids: ids } }
   );
 }
 
