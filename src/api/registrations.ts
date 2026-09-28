@@ -219,6 +219,16 @@ export async function deleteRegistration(id: string): Promise<void> {
   await apiFetch<void>(`/api/v1/registrations/admin/registrations/${id}/`, { method: 'DELETE' });
 }
 
+// Separate from updateRegistrationDetails below — this is the only
+// endpoint that also fires the "you're confirmed" notification when
+// transitioning into CONFIRMED (e.g. cash paid at the door).
+export async function updateRegistrationStatus(id: string, status: string): Promise<AdminRegistration> {
+  return apiFetch<AdminRegistration>(`/api/v1/registrations/admin/registrations/${id}/`, {
+    method: 'PATCH',
+    body: { status },
+  });
+}
+
 // Same field set as the manual "Add person" form, minus email — the
 // backend rejects the whole request outright if an "email" key is
 // present at all, so this is never even offered as an option here.

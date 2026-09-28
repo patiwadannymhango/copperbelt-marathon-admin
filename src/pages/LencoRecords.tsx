@@ -11,6 +11,7 @@ import {
   listRegistrations,
   resendConfirmationEmails,
   updateRegistrationDetails,
+  updateRegistrationStatus,
   STATUS_OPTIONS,
   type AdminRegistration,
   type FilterOptions,
@@ -155,6 +156,16 @@ export default function LencoRecords() {
       setEditError(err instanceof Error ? err.message : 'Failed to update record.');
     } finally {
       setEditBusy(false);
+    }
+  }
+
+  async function handleStatusChange(id: string, newStatus: string) {
+    try {
+      await updateRegistrationStatus(id, newStatus);
+      setNotice('Status updated.');
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update status.');
     }
   }
 
@@ -413,9 +424,18 @@ export default function LencoRecords() {
                   <td className={r.participant.email ? '' : 'dim'}>{r.participant.email || '—'}</td>
                   <td className={r.form_data.tshirt_size ? '' : 'dim'}>{r.form_data.tshirt_size || '—'}</td>
                   <td>
-                    <span className={`status-badge status-${r.status}`}>
-                      {registrationStatusLabel(r.status)}
-                    </span>
+                    <select
+                      className={`status-select status-${r.status}`}
+                      value={r.status}
+                      onChange={(e) => handleStatusChange(r.id, e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s} value={s}>
+                          {titleCase(s)}
+                        </option>
+                      ))}
+                    </select>
                   </td>
                   <td>
                     <div className="row-actions">

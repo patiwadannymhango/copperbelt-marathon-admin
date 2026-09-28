@@ -5,12 +5,15 @@ import BulkResendBar from '../components/BulkResendBar';
 import { titleCase, formatTime, registrationStatusLabel } from '../utils/format';
 import {
   createVendorManually,
+  deleteVendorRegistration,
   downloadVendorExport,
   fetchAllVendorIds,
   getVendorDashboard,
   getVendorFilterOptions,
   listVendorRegistrations,
   resendVendorConfirmationEmails,
+  updateVendorRegistrationDetails,
+  updateVendorRegistrationStatus,
   REQUIREMENT_OPTIONS,
   STATUS_OPTIONS,
   type AdminVendorRegistration,
@@ -54,6 +57,23 @@ export default function Vendors() {
     requirement: '',
     status: 'CONFIRMED',
   });
+
+  const [editTarget, setEditTarget] = useState<AdminVendorRegistration | null>(null);
+  const [editBusy, setEditBusy] = useState(false);
+  const [editError, setEditError] = useState('');
+  const [editForm, setEditForm] = useState({
+    first_name: '',
+    last_name: '',
+    phone: '',
+    business_name: '',
+    business_location: '',
+    products_services: '',
+    requirement: '',
+  });
+
+  const [deleteTarget, setDeleteTarget] = useState<AdminVendorRegistration | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
@@ -178,6 +198,81 @@ export default function Vendors() {
       setError(err instanceof Error ? err.message : 'Export failed.');
     } finally {
       setExportBusy(false);
+    }
+  }
+
+  async function handleStatusChange(id: string, newStatus: string) {
+    try {
+      await updateVendorRegistrationStatus(id, newStatus);
+      setNotice('Status updated.');
+      load();
+      loadStats();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update status.');
+    }
+  }
+
+  function openEditDialog(row: AdminVendorRegistration) {
+    setEditTarget(row);
+    setEditError('');
+    setEditForm({
+      first_name: row.participant.first_name,
+      last_name: row.participant.last_name,
+      phone: row.participant.phone,
+      business_name: row.form_data.business_name || '',
+      business_location: row.form_data.business_location || '',
+      products_services: row.form_data.products_services || '',
+      requirement: row.form_data.requirement || '',
+    });
+  }
+
+  function closeEditDialog() {
+    if (editBusy) return;
+    setEditTarget(null);
+    setEditError('');
+  }
+
+  async function handleSaveEdit() {
+    if (!editTarget) return;
+    setEditBusy(true);
+    setEditError('');
+    try {
+      await updateVendorRegistrationDetails(editTarget.id, editForm);
+      setEditTarget(null);
+      setNotice('Vendor updated.');
+      load();
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : 'Failed to update vendor.');
+    } finally {
+      setEditBusy(false);
+    }
+  }
+
+  function openDeleteDialog(row: AdminVendorRegistration) {
+    setDeleteTarget(row);
+    setDeleteError('');
+  }
+
+  function closeDeleteDialog() {
+    if (deleteBusy) return;
+    setDeleteTarget(null);
+    setDeleteError('');
+  }
+
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return;
+    setDeleteBusy(true);
+    setDeleteError('');
+    try {
+      await deleteVendorRegistration(deleteTarget.id);
+      setDeleteTarget(null);
+      setNotice('Vendor registration deleted.');
+      load();
+      loadStats();
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete.');
+    } finally {
+      setDeleteBusy(false);
     }
   }
 
@@ -355,6 +450,7 @@ export default function Vendors() {
                 <th>Requirement</th>
                 <th>Amount</th>
                 <th>Registration Status</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -385,9 +481,34 @@ export default function Vendors() {
                     {Number(r.amount) > 0 ? `K${Number(r.amount).toLocaleString()}` : 'FREE'}
                   </td>
                   <td>
-                    <span className={`status-badge status-${r.status}`}>
-                      {registrationStatusLabel(r.status)}
-                    </span>
+                    <select
+                      className={`status-select status-${r.status}`}
+                      value={r.status}
+                      onChange={(e) => handleStatusChange(r.id, e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s} value={s}>
+                          {titleCase(s)}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    <div className="row-actions">
+                      <button className="row-action-btn" title="Edit" onClick={() => openEditDialog(r)}>
+                        ✎
+                      </button>
+                      {registrationStatusLabel(r.status) === 'Unconfirmed' && (
+                        <button
+                          className="row-action-btn row-action-danger"
+                          title="Delete (only available for unconfirmed registrations)"
+                          onClick={() => openDeleteDialog(r)}
+                        >
+                          🗑
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -524,6 +645,110 @@ export default function Vendors() {
                 }
               >
                 {addBusy ? 'Saving…' : 'Register'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editTarget && (
+        <div className="modal-backdrop" onClick={closeEditDialog}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <h2>Edit vendor — {editTarget.registration_number}</h2>
+            <div className="field">
+              <label>Email</label>
+              <input value={editTarget.participant.email || '—'} disabled />
+              <p className="field-note">Email can't be changed after registration.</p>
+            </div>
+            <div className="field">
+              <label>Contact first name</label>
+              <input
+                value={editForm.first_name}
+                onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label>Contact last name</label>
+              <input
+                value={editForm.last_name}
+                onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label>Phone</label>
+              <input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
+            </div>
+            <div className="field">
+              <label>Business / Company name</label>
+              <input
+                value={editForm.business_name}
+                onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label>Business location</label>
+              <input
+                value={editForm.business_location}
+                onChange={(e) => setEditForm({ ...editForm, business_location: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label>Products / services</label>
+              <textarea
+                rows={3}
+                value={editForm.products_services}
+                onChange={(e) => setEditForm({ ...editForm, products_services: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label>Exhibition / activation requirement</label>
+              <select
+                className="filter-select"
+                style={{ width: '100%' }}
+                value={editForm.requirement}
+                onChange={(e) => setEditForm({ ...editForm, requirement: e.target.value })}
+              >
+                <option value="">Select…</option>
+                {REQUIREMENT_OPTIONS.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {editError && <div className="banner banner-error">{editError}</div>}
+            <div className="modal-actions">
+              <button className="btn" onClick={closeEditDialog} disabled={editBusy}>
+                Cancel
+              </button>
+              <button
+                className="btn btn-success"
+                onClick={handleSaveEdit}
+                disabled={editBusy || !editForm.first_name.trim() || !editForm.last_name.trim()}
+              >
+                {editBusy ? 'Saving…' : 'Save changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="modal-backdrop" onClick={closeDeleteDialog}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <h2 className="modal-title-danger">⚠ Delete vendor registration?</h2>
+            <p className="bulk-intro">
+              Are you sure you want to delete{' '}
+              <strong style={{ color: 'var(--text)' }}>{deleteTarget.registration_number}</strong> (
+              {deleteTarget.participant.first_name} {deleteTarget.participant.last_name})? This cannot be undone.
+            </p>
+            {deleteError && <div className="banner banner-error">{deleteError}</div>}
+            <div className="modal-actions">
+              <button className="btn" onClick={closeDeleteDialog} disabled={deleteBusy}>
+                Cancel
+              </button>
+              <button className="btn btn-danger" onClick={handleConfirmDelete} disabled={deleteBusy}>
+                {deleteBusy ? 'Deleting…' : 'Delete'}
               </button>
             </div>
           </div>

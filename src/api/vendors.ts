@@ -151,3 +151,43 @@ export async function createVendorManually(payload: {
 export async function downloadVendorExport(): Promise<Blob> {
   return apiFetchBlob(`/api/v1/registrations/admin/events/${VENDOR_EVENT_ID}/registrations/export/`);
 }
+
+// These three aren't actually vendor-event-scoped (the URLs are keyed
+// by registration id, not event id) — same endpoints
+// api/registrations.ts's equivalents call. Duplicated here rather than
+// imported across modules, matching this file's existing "parallel API
+// module" split from registrations.ts.
+
+export async function updateVendorRegistrationStatus(
+  id: string,
+  status: string
+): Promise<AdminVendorRegistration> {
+  return apiFetch<AdminVendorRegistration>(`/api/v1/registrations/admin/registrations/${id}/`, {
+    method: 'PATCH',
+    body: { status },
+  });
+}
+
+// Same field set as the "Add vendor" form, minus email (the backend
+// rejects the request outright if an "email" key is present at all).
+export async function updateVendorRegistrationDetails(
+  id: string,
+  payload: {
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    business_name?: string;
+    business_location?: string;
+    products_services?: string;
+    requirement?: string;
+  }
+): Promise<AdminVendorRegistration> {
+  return apiFetch<AdminVendorRegistration>(`/api/v1/registrations/admin/registrations/${id}/details/`, {
+    method: 'PATCH',
+    body: payload,
+  });
+}
+
+export async function deleteVendorRegistration(id: string): Promise<void> {
+  await apiFetch<void>(`/api/v1/registrations/admin/registrations/${id}/`, { method: 'DELETE' });
+}
