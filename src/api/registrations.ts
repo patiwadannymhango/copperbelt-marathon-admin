@@ -198,6 +198,7 @@ export interface RegistrationSummary {
   by_gender: GenderCount[];
   by_source: SourceCount[];
   confirmed_by_source: SourceCount[];
+  lenco_by_status: { status: string; count: number }[];
 }
 
 export async function getRegistrationSummary(): Promise<RegistrationSummary> {

@@ -2,12 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import HeaderNav from '../components/HeaderNav';
 import BulkResendBar from '../components/BulkResendBar';
-import { titleCase, formatTime, registrationStatusLabel } from '../utils/format';
+import { titleCase, formatTime, registrationStatusLabel, bucketStatusCounts } from '../utils/format';
 import {
   deleteRegistration,
   downloadExport,
   fetchAllRegistrationIds,
   getFilterOptions,
+  getRegistrationSummary,
   listRegistrations,
   resendConfirmationEmails,
   updateRegistrationDetails,
@@ -41,6 +42,7 @@ export default function LencoRecords() {
 
   const [rows, setRows] = useState<AdminRegistration[]>([]);
   const [count, setCount] = useState(0);
+  const [statusBreakdown, setStatusBreakdown] = useState<{ status: string; count: number }[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -102,6 +104,14 @@ export default function LencoRecords() {
 
   useEffect(load, [load]);
 
+  function loadStats() {
+    getRegistrationSummary()
+      .then((summary) => setStatusBreakdown(summary.lenco_by_status))
+      .catch(() => {});
+  }
+
+  useEffect(loadStats, []);
+
   useEffect(() => {
     getFilterOptions()
       .then(setFilterOptions)
@@ -114,7 +124,10 @@ export default function LencoRecords() {
   }, []);
 
   useEffect(() => {
-    const poll = setInterval(() => load(true), REFRESH_INTERVAL_MS);
+    const poll = setInterval(() => {
+      load(true);
+      loadStats();
+    }, REFRESH_INTERVAL_MS);
     return () => clearInterval(poll);
   }, [load]);
 
@@ -164,6 +177,7 @@ export default function LencoRecords() {
       await updateRegistrationStatus(id, newStatus);
       setNotice('Status updated.');
       load();
+      loadStats();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update status.');
     }
@@ -189,6 +203,7 @@ export default function LencoRecords() {
       setDeleteTarget(null);
       setNotice('Record deleted.');
       load();
+      loadStats();
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : 'Failed to delete.');
     } finally {
@@ -253,6 +268,12 @@ export default function LencoRecords() {
 
   const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
+  // From the summary endpoint's lenco_by_status — independent of whatever
+  // filters are currently applied to the table below, so these stay the
+  // true overall figures rather than reflecting the current search/filter.
+  const statusBuckets = bucketStatusCounts(statusBreakdown);
+  const statusTotal = statusBreakdown.reduce((sum, s) => sum + s.count, 0);
+
   return (
     <div className="page">
       <div className="header">
@@ -268,7 +289,13 @@ export default function LencoRecords() {
             <span className="live-dot" />
             Live · {formatTime(now)}
           </span>
-          <button className="btn" onClick={() => load()}>
+          <button
+            className="btn"
+            onClick={() => {
+              load();
+              loadStats();
+            }}
+          >
             ↻ Refresh
           </button>
           <button className="btn btn-amber" onClick={handleExport} disabled={exportBusy}>
@@ -292,9 +319,33 @@ export default function LencoRecords() {
       <div className="stats-row">
         <div className="stat-card">
           <p className="stat-label">TOTAL</p>
-          <p className="stat-value">{count}</p>
+          <p className="stat-value">{statusTotal}</p>
           <p className="stat-sub">migrated records</p>
         </div>
+        <div className="stat-card paid">
+          <p className="stat-label">CONFIRMED</p>
+          <p className="stat-value">{statusBuckets.Confirmed}</p>
+          <p className="stat-sub">confirmed</p>
+        </div>
+        <div className="stat-card">
+          <p className="stat-label">UNCONFIRMED</p>
+          <p className="stat-value">{statusBuckets.Unconfirmed}</p>
+          <p className="stat-sub">awaiting confirmation</p>
+        </div>
+        {statusBuckets.Reserved > 0 && (
+          <div className="stat-card">
+            <p className="stat-label">RESERVED</p>
+            <p className="stat-value">{statusBuckets.Reserved}</p>
+            <p className="stat-sub">reserved</p>
+          </div>
+        )}
+        {statusBuckets.Exempted > 0 && (
+          <div className="stat-card">
+            <p className="stat-label">EXEMPTED</p>
+            <p className="stat-value">{statusBuckets.Exempted}</p>
+            <p className="stat-sub">cancelled | expired | refunded</p>
+          </div>
+        )}
       </div>
 
       <div className="filters-row">
