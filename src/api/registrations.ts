@@ -197,6 +197,7 @@ export interface RegistrationSummary {
   by_tshirt_size: TshirtSizeCount[];
   by_gender: GenderCount[];
   by_source: SourceCount[];
+  confirmed_by_source: SourceCount[];
 }
 
 export async function getRegistrationSummary(): Promise<RegistrationSummary> {

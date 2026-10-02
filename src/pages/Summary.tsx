@@ -101,6 +101,17 @@ export default function Summary() {
   const sourceTotal = sourceRows.reduce((sum, s) => sum + s.count, 0);
   const lencoCount = sourceRows.find((s) => s.source === 'LENCO_MIGRATION')?.count ?? 0;
 
+  const confirmedSourceRows = summary
+    ? [...summary.confirmed_by_source].sort((a, b) => {
+        const ai = SOURCE_ORDER.indexOf(a.source);
+        const bi = SOURCE_ORDER.indexOf(b.source);
+        if (ai === -1 && bi === -1) return a.source_display.localeCompare(b.source_display);
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
+      })
+    : [];
+
   return (
     <div className="page">
       <div className="header">
@@ -262,6 +273,29 @@ export default function Summary() {
             </div>
             {genderRows.length > 0 && (
               <p className="summary-footnote">{genderTotal} total.</p>
+            )}
+          </div>
+
+          <div className="table-card" style={{ marginTop: 18 }}>
+            <div className="summary-section-title">Confirmed, by source</div>
+            <div className="tshirt-grid">
+              {confirmedSourceRows.map((s) => (
+                <div
+                  className={s.source === 'LENCO_MIGRATION' ? 'tshirt-chip tshirt-chip-highlight' : 'tshirt-chip'}
+                  key={s.source}
+                >
+                  <span className="tshirt-size">{s.source_display}</span>
+                  <span className="tshirt-count">{s.count}</span>
+                </div>
+              ))}
+              {confirmedSourceRows.length === 0 && <p className="dim">No confirmed registrations yet.</p>}
+            </div>
+            {confirmedSourceRows.length > 0 && (
+              <p className="summary-footnote">
+                {confirmedSourceRows.reduce((sum, s) => sum + s.count, 0)} total — adds up to the CONFIRMED
+                figure above: Lipila Paid (real payments) + Confirmed Uploaded (admin/manual entries) + Lenco
+                Upload Confirmed (migrated records).
+              </p>
             )}
           </div>
 
