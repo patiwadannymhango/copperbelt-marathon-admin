@@ -112,6 +112,13 @@ export default function Summary() {
       })
     : [];
 
+  // The stat card below is specifically "how many Lenco records are
+  // actually confirmed" — distinct from lencoCount above, which is every
+  // Lenco row regardless of status and is what the table's "From Lenco"
+  // column (a per-category/overall total) still uses.
+  const lencoConfirmedCount =
+    confirmedSourceRows.find((s) => s.source === 'LENCO_MIGRATION')?.count ?? 0;
+
   return (
     <div className="page">
       <div className="header">
@@ -169,11 +176,11 @@ export default function Summary() {
                 <p className="stat-sub">cancelled | expired | refunded</p>
               </div>
             )}
-            {lencoCount > 0 && (
+            {lencoConfirmedCount > 0 && (
               <div className="stat-card highlight">
-                <p className="stat-label">FROM LENCO</p>
-                <p className="stat-value">{lencoCount}</p>
-                <p className="stat-sub">migrated — excluded from Registrations</p>
+                <p className="stat-label">LENCO CONFIRMED</p>
+                <p className="stat-value">{lencoConfirmedCount}</p>
+                <p className="stat-sub">confirmed — excluded from Registrations</p>
               </div>
             )}
           </div>
