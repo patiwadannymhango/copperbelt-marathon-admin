@@ -338,3 +338,37 @@ export async function commitBulkUpload(rows: BulkUploadRow[]): Promise<BulkUploa
     { method: 'POST', body: { rows } }
   );
 }
+
+// --- Race pack collection email broadcast -----------------------------
+// Queues the branded "Race Pack Collection Details" email for every
+// confirmed registration that hasn't had one yet. Runs on a Celery
+// worker in the background (see backend apps/notifications/tasks.py) —
+// this call just enqueues and returns immediately, it does not wait for
+// any email to actually send.
+
+export interface RacePackEmailQueueResult {
+  queued_count: number;
+  already_sent_count: number;
+  skipped_no_email_count: number;
+}
+
+export async function sendRacePackEmails(): Promise<RacePackEmailQueueResult> {
+  return apiFetch<RacePackEmailQueueResult>(
+    `/api/v1/registrations/admin/events/${EVENT_ID}/registrations/send-race-pack-email/`,
+    { method: 'POST' }
+  );
+}
+
+export interface RacePackEmailStatus {
+  confirmed_count: number;
+  sent_count: number;
+  failed_count: number;
+  pending_count: number;
+  not_yet_queued_count: number;
+}
+
+export async function getRacePackEmailStatus(): Promise<RacePackEmailStatus> {
+  return apiFetch<RacePackEmailStatus>(
+    `/api/v1/registrations/admin/events/${EVENT_ID}/registrations/send-race-pack-email/status/`
+  );
+}

@@ -11,14 +11,17 @@ import {
   fetchAllRegistrationIds,
   getDashboard,
   getFilterOptions,
+  getRacePackEmailStatus,
   listRegistrations,
   resendConfirmationEmails,
+  sendRacePackEmails,
   updateRegistrationDetails,
   updateRegistrationStatus,
   STATUS_OPTIONS,
   type AdminRegistration,
   type DashboardStats,
   type FilterOptions,
+  type RacePackEmailStatus,
 } from '../api/registrations';
 import {
   GENDER_OPTIONS,
@@ -112,6 +115,12 @@ export default function Registrations() {
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
+  const [racePackOpen, setRacePackOpen] = useState(false);
+  const [racePackBusy, setRacePackBusy] = useState(false);
+  const [racePackError, setRacePackError] = useState('');
+  const [racePackStatus, setRacePackStatus] = useState<RacePackEmailStatus | null>(null);
+  const [racePackQueuedJustNow, setRacePackQueuedJustNow] = useState<number | null>(null);
+
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const load = useCallback(
@@ -164,6 +173,15 @@ export default function Registrations() {
     }, REFRESH_INTERVAL_MS);
     return () => clearInterval(poll);
   }, [load]);
+
+  // Only polls while the dialog is actually open, watching the Celery
+  // worker drain the queue in the background — no point hitting this
+  // endpoint when nobody's looking at the progress numbers.
+  useEffect(() => {
+    if (!racePackOpen) return;
+    const poll = setInterval(refreshRacePackStatus, 5000);
+    return () => clearInterval(poll);
+  }, [racePackOpen]);
 
   function handleRefresh() {
     load();
@@ -330,6 +348,43 @@ export default function Registrations() {
     }
   }
 
+  function openRacePackDialog() {
+    setRacePackOpen(true);
+    setRacePackError('');
+    setRacePackQueuedJustNow(null);
+    refreshRacePackStatus();
+  }
+
+  function closeRacePackDialog() {
+    if (racePackBusy) return;
+    setRacePackOpen(false);
+  }
+
+  function refreshRacePackStatus() {
+    getRacePackEmailStatus()
+      .then(setRacePackStatus)
+      .catch(() => {});
+  }
+
+  async function handleSendRacePackEmails() {
+    setRacePackBusy(true);
+    setRacePackError('');
+    try {
+      const result = await sendRacePackEmails();
+      setRacePackQueuedJustNow(result.queued_count);
+      setNotice(
+        result.queued_count > 0
+          ? `Queued ${result.queued_count} race pack emails — sending in the background.`
+          : 'Nothing to queue — everyone confirmed has already been sent this email.'
+      );
+      refreshRacePackStatus();
+    } catch (err) {
+      setRacePackError(err instanceof Error ? err.message : 'Failed to queue emails.');
+    } finally {
+      setRacePackBusy(false);
+    }
+  }
+
   function toggleRow(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -394,6 +449,9 @@ export default function Registrations() {
           </button>
           <button className="btn btn-amber" onClick={handleExport} disabled={exportBusy}>
             {exportBusy ? 'Exporting…' : '↓ Export Excel'}
+          </button>
+          <button className="btn" onClick={openRacePackDialog}>
+            ✉ Send Race Pack Email
           </button>
           <button className="btn" onClick={logout}>
             Log out
@@ -980,6 +1038,71 @@ export default function Registrations() {
               </button>
               <button className="btn btn-danger" onClick={handleConfirmDelete} disabled={deleteBusy}>
                 {deleteBusy ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {racePackOpen && (
+        <div className="modal-backdrop" onClick={closeRacePackDialog}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <h2>✉ Send Race Pack Email</h2>
+            <p className="bulk-intro">
+              Sends the branded "Race Pack Collection Details" email to every confirmed registration that
+              hasn't received it yet. This runs in the background on the server — it's safe to close this
+              dialog once queued, and safe to come back and send again later for anyone newly confirmed.
+            </p>
+
+            {racePackStatus ? (
+              <div className="stats-row" style={{ margin: '4px 0 18px' }}>
+                <div className="stat-card">
+                  <p className="stat-label">CONFIRMED</p>
+                  <p className="stat-value">{racePackStatus.confirmed_count}</p>
+                </div>
+                <div className="stat-card paid">
+                  <p className="stat-label">ALREADY SENT</p>
+                  <p className="stat-value">{racePackStatus.sent_count}</p>
+                </div>
+                <div className="stat-card">
+                  <p className="stat-label">IN PROGRESS</p>
+                  <p className="stat-value">{racePackStatus.pending_count}</p>
+                </div>
+                <div className="stat-card">
+                  <p className="stat-label">NOT YET QUEUED</p>
+                  <p className="stat-value">{racePackStatus.not_yet_queued_count}</p>
+                </div>
+                {racePackStatus.failed_count > 0 && (
+                  <div className="stat-card">
+                    <p className="stat-label">FAILED</p>
+                    <p className="stat-value">{racePackStatus.failed_count}</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="dim">Loading current status…</p>
+            )}
+
+            {racePackQueuedJustNow !== null && (
+              <div className="banner banner-success">
+                Queued {racePackQueuedJustNow} email{racePackQueuedJustNow === 1 ? '' : 's'} — sending now in the
+                background. Reopen this dialog any time to check progress.
+              </div>
+            )}
+            {racePackError && <div className="banner banner-error">{racePackError}</div>}
+
+            <div className="modal-actions">
+              <button className="btn" onClick={closeRacePackDialog} disabled={racePackBusy}>
+                Close
+              </button>
+              <button
+                className="btn btn-success"
+                onClick={handleSendRacePackEmails}
+                disabled={racePackBusy || !racePackStatus || racePackStatus.not_yet_queued_count === 0}
+              >
+                {racePackBusy
+                  ? 'Queuing…'
+                  : `Send to ${racePackStatus?.not_yet_queued_count ?? 0} people`}
               </button>
             </div>
           </div>
