@@ -933,6 +933,22 @@ table.summary-table tfoot td {
   font-weight: 700;
 }
 
+/* Marks a row registered after the fixed October 2026 cleanup cutoff
+   (see NEW_SINCE_CUTOFF in Registrations.tsx) — a permanent "new since
+   the big cleanup" visual marker, not a transient/today indicator. */
+.row-new-since-cutoff {
+  background: rgba(60, 130, 246, 0.08);
+}
+.row-new-since-cutoff:hover {
+  background: rgba(60, 130, 246, 0.14);
+}
+.row-new-since-cutoff td {
+  color: #2a5fd6;
+}
+.row-new-since-cutoff td.dim {
+  color: #6f8fd6;
+}
+
 .lenco-badge {
   display: inline-flex;
   padding: 3px 10px;

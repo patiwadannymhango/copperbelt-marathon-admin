@@ -30,6 +30,13 @@ import {
 const PAGE_SIZE = 25;
 const REFRESH_INTERVAL_MS = 30000;
 
+// Fixed marker from the October 2026 data cleanup/correction pass —
+// anything registered after this moment shows with a blue highlight so
+// staff can tell "new since the big cleanup" from the already-verified
+// batch at a glance. Intentionally a permanent, never-moving cutoff, not
+// a rolling "today" indicator.
+const NEW_SINCE_CUTOFF = new Date('2026-10-03T15:12:40.955868+02:00').getTime();
+
 // function LogoBadge() {
 //   return (
 //     <div className="logo-badge">
@@ -53,7 +60,10 @@ export default function Registrations() {
   const [notice, setNotice] = useState('');
 
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  // Defaults to Confirmed-only — new pending/waiting/reserved registrations
+  // shouldn't clutter the main view going forward (existing ones from
+  // before the cleanup are still reachable by switching this filter).
+  const [statusFilter, setStatusFilter] = useState('CONFIRMED');
   const [raceFilter, setRaceFilter] = useState('');
   const [genderFilter, setGenderFilter] = useState('');
   const [orgFilter, setOrgFilter] = useState('');
@@ -541,8 +551,10 @@ export default function Registrations() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, i) => (
-                <tr key={r.id}>
+              {rows.map((r, i) => {
+                const isNewSinceCutoff = new Date(r.registered_at).getTime() > NEW_SINCE_CUTOFF;
+                return (
+                <tr key={r.id} className={isNewSinceCutoff ? 'row-new-since-cutoff' : ''}>
                   <td>
                     <input
                       type="checkbox"
@@ -602,7 +614,8 @@ export default function Registrations() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
           {loading && <div className="loading-state">Loading…</div>}
