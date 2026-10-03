@@ -12,6 +12,7 @@
   --green: #34d399;
   --green-bg: #1f8f5f;
   --red: #e5675f;
+  --blue: #5b9bf5;
 
   --radius: 10px;
   --radius-pill: 999px;
@@ -947,6 +948,14 @@ table.summary-table tfoot td {
 }
 .row-new-since-cutoff td.dim {
   color: #6f8fd6;
+}
+/* The Registration Status pill is normally green for Confirmed — on a
+   new-since-cutoff row it goes blue instead, so the "new" signal shows
+   up on the status control itself, not just the row tint. */
+.row-new-since-cutoff .status-select.status-CONFIRMED {
+  color: var(--blue);
+  border-color: rgba(91, 155, 245, 0.4);
+  background-color: rgba(91, 155, 245, 0.08);
 }
 
 .lenco-badge {
