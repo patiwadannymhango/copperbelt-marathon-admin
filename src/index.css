@@ -936,22 +936,9 @@ table.summary-table tfoot td {
 
 /* Marks a row registered after the fixed October 2026 cleanup cutoff
    (see NEW_SINCE_CUTOFF in Registrations.tsx) — a permanent "new since
-   the big cleanup" visual marker, not a transient/today indicator. */
-.row-new-since-cutoff {
-  background: rgba(60, 130, 246, 0.08);
-}
-.row-new-since-cutoff:hover {
-  background: rgba(60, 130, 246, 0.14);
-}
-.row-new-since-cutoff td {
-  color: #2a5fd6;
-}
-.row-new-since-cutoff td.dim {
-  color: #6f8fd6;
-}
-/* The Registration Status pill is normally green for Confirmed — on a
-   new-since-cutoff row it goes blue instead, so the "new" signal shows
-   up on the status control itself, not just the row tint. */
+   the big cleanup" marker. The Registration Status pill is normally
+   green for Confirmed; on a new-since-cutoff row it goes blue instead
+   so the "new" signal shows up on the status control itself. */
 .row-new-since-cutoff .status-select.status-CONFIRMED {
   color: var(--blue);
   border-color: rgba(91, 155, 245, 0.4);
