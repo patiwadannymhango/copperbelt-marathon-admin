@@ -63,10 +63,7 @@ export default function Registrations() {
   const [notice, setNotice] = useState('');
 
   const [search, setSearch] = useState('');
-  // Defaults to Confirmed-only — new pending/waiting/reserved registrations
-  // shouldn't clutter the main view going forward (existing ones from
-  // before the cleanup are still reachable by switching this filter).
-  const [statusFilter, setStatusFilter] = useState('CONFIRMED');
+  const [statusFilter, setStatusFilter] = useState('');
   const [raceFilter, setRaceFilter] = useState('');
   const [genderFilter, setGenderFilter] = useState('');
   const [orgFilter, setOrgFilter] = useState('');
