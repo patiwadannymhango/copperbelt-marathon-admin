@@ -33,12 +33,13 @@ import {
 const PAGE_SIZE = 25;
 const REFRESH_INTERVAL_MS = 30000;
 
-// Fixed marker from the October 2026 data cleanup/correction pass —
-// anything registered after this moment shows with a blue highlight so
-// staff can tell "new since the big cleanup" from the already-verified
-// batch at a glance. Intentionally a permanent, never-moving cutoff, not
-// a rolling "today" indicator.
-const NEW_SINCE_CUTOFF = new Date('2026-10-03T15:12:40.955868+02:00').getTime();
+// Fixed marker from the 5 October 2026 print-dump snapshot — anything
+// registered after this moment shows with a purple highlight so staff can
+// tell "new since that export" from the already-verified batch at a
+// glance. Intentionally a permanent, never-moving cutoff, not a rolling
+// "today" indicator. Previously 2026-10-03T15:12:40 (blue) — moved
+// forward and recolored after the 2026-10-05 print dump.
+const NEW_SINCE_CUTOFF = new Date('2026-10-05T18:36:45.189173+02:00').getTime();
 
 // function LogoBadge() {
 //   return (

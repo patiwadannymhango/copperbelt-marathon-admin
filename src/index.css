@@ -12,7 +12,7 @@
   --green: #34d399;
   --green-bg: #1f8f5f;
   --red: #e5675f;
-  --blue: #5b9bf5;
+  --purple: #9b6bf5;
 
   --radius: 10px;
   --radius-pill: 999px;
@@ -934,15 +934,15 @@ table.summary-table tfoot td {
   font-weight: 700;
 }
 
-/* Marks a row registered after the fixed October 2026 cleanup cutoff
+/* Marks a row registered after the fixed 5 October 2026 print-dump cutoff
    (see NEW_SINCE_CUTOFF in Registrations.tsx) — a permanent "new since
-   the big cleanup" marker. The Registration Status pill is normally
-   green for Confirmed; on a new-since-cutoff row it goes blue instead
-   so the "new" signal shows up on the status control itself. */
+   that export" marker. The Registration Status pill is normally green
+   for Confirmed; on a new-since-cutoff row it goes purple instead so the
+   "new" signal shows up on the status control itself. */
 .row-new-since-cutoff .status-select.status-CONFIRMED {
-  color: var(--blue);
-  border-color: rgba(91, 155, 245, 0.4);
-  background-color: rgba(91, 155, 245, 0.08);
+  color: var(--purple);
+  border-color: rgba(155, 107, 245, 0.4);
+  background-color: rgba(155, 107, 245, 0.08);
 }
 
 .lenco-badge {
