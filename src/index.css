@@ -13,7 +13,6 @@
   --green-bg: #1f8f5f;
   --red: #e5675f;
   --purple: #9b6bf5;
-  --teal: #2dd4bf;
 
   --radius: 10px;
   --radius-pill: 999px;
@@ -946,16 +945,6 @@ table.summary-table tfoot td {
   background-color: rgba(155, 107, 245, 0.08);
 }
 
-/* Same idea, second tier: a row registered after the fixed 7 October 2026
-   Purple Records export cutoff (see TEAL_SINCE_CUTOFF in
-   Registrations.tsx) goes teal instead of purple — a row only ever gets
-   one of the two, teal taking priority since it's the more recent marker.
-   Deliberately doesn't touch .row-new-since-cutoff above. */
-.row-teal-since-cutoff .status-select.status-CONFIRMED {
-  color: var(--teal);
-  border-color: rgba(45, 212, 191, 0.4);
-  background-color: rgba(45, 212, 191, 0.08);
-}
 
 .lenco-badge {
   display: inline-flex;
