@@ -33,14 +33,17 @@ import {
 const PAGE_SIZE = 25;
 const REFRESH_INTERVAL_MS = 30000;
 
-// Fixed marker from the 5 October 2026 print-dump snapshot — anything
-// registered after this moment shows with a purple highlight so staff can
-// tell "new since that export" from the already-verified batch at a
-// glance. Intentionally a permanent, never-moving cutoff, not a rolling
-// "today" indicator. A second teal tier was tried and then deliberately
-// reverted — one marker (purple) is all that's wanted here; the
-// already-verified batch before this cutoff stays plain green, untouched.
+// Two stacked, permanent, never-moving cutoffs — each marks "new since X"
+// with its own color so staff can tell three batches apart at a glance:
+// the already-verified batch (plain green, untouched), the 5 October
+// print-dump batch (purple, untouched), and everything since the 8
+// October collection-list export (sky blue). A row gets at most one
+// highlight — sky blue wins if it qualifies for both, since it's the
+// more specific/recent marker. (An earlier teal second-tier attempt was
+// tried and deliberately reverted — this is a fresh, explicitly
+// requested tier, not a repeat of that.)
 const PURPLE_SINCE_CUTOFF = new Date('2026-10-05T18:36:45.189173+02:00').getTime();
+const SKYBLUE_SINCE_CUTOFF = new Date('2026-10-08T11:16:41.476009+02:00').getTime();
 
 // function LogoBadge() {
 //   return (
@@ -609,9 +612,15 @@ export default function Registrations() {
             </thead>
             <tbody>
               {rows.map((r, i) => {
-                const isNewSinceCutoff = new Date(r.registered_at).getTime() > PURPLE_SINCE_CUTOFF;
+                const registeredAt = new Date(r.registered_at).getTime();
+                const cutoffClass =
+                  registeredAt > SKYBLUE_SINCE_CUTOFF
+                    ? 'row-skyblue-since-cutoff'
+                    : registeredAt > PURPLE_SINCE_CUTOFF
+                      ? 'row-new-since-cutoff'
+                      : '';
                 return (
-                <tr key={r.id} className={isNewSinceCutoff ? 'row-new-since-cutoff' : ''}>
+                <tr key={r.id} className={cutoffClass}>
                   <td>
                     <input
                       type="checkbox"

@@ -13,6 +13,7 @@
   --green-bg: #1f8f5f;
   --red: #e5675f;
   --purple: #9b6bf5;
+  --sky-blue: #38bdf8;
 
   --radius: 10px;
   --radius-pill: 999px;
@@ -943,6 +944,18 @@ table.summary-table tfoot td {
   color: var(--purple);
   border-color: rgba(155, 107, 245, 0.4);
   background-color: rgba(155, 107, 245, 0.08);
+}
+
+/* Same idea, third tier: a row registered after the fixed 8 October 2026
+   collection-list export cutoff (see SKYBLUE_SINCE_CUTOFF in
+   Registrations.tsx) goes sky blue instead of purple — a row only ever
+   gets one highlight, sky blue taking priority since it's the more
+   recent marker. Deliberately doesn't touch .row-new-since-cutoff
+   (purple) or the plain green default above. */
+.row-skyblue-since-cutoff .status-select.status-CONFIRMED {
+  color: var(--sky-blue);
+  border-color: rgba(56, 189, 248, 0.4);
+  background-color: rgba(56, 189, 248, 0.08);
 }
 
 
