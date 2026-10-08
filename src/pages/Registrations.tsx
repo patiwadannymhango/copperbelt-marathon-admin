@@ -36,14 +36,17 @@ const REFRESH_INTERVAL_MS = 30000;
 // Two stacked, permanent, never-moving cutoffs — each marks "new since X"
 // with its own color so staff can tell three batches apart at a glance:
 // the already-verified batch (plain green, untouched), the 5 October
-// print-dump batch (purple, untouched), and everything since the 8
-// October collection-list export (sky blue). A row gets at most one
-// highlight — sky blue wins if it qualifies for both, since it's the
-// more specific/recent marker. (An earlier teal second-tier attempt was
-// tried and deliberately reverted — this is a fresh, explicitly
-// requested tier, not a repeat of that.)
+// print-dump batch (purple, untouched), and everything NOT included in
+// the 8 October collection-list Excel exports (sky blue). The sky-blue
+// cutoff is pinned to the exact moment those files were saved
+// (10:58:34) — not when this code was written (11:16) — so "sky blue"
+// means precisely "registered after the printed list was generated,
+// not on the sheet," matching what the desk actually needs to know. A
+// row gets at most one highlight — sky blue wins if it qualifies for
+// both. (An earlier teal second-tier attempt was tried and deliberately
+// reverted — this is a fresh, explicitly requested tier, not a repeat.)
 const PURPLE_SINCE_CUTOFF = new Date('2026-10-05T18:36:45.189173+02:00').getTime();
-const SKYBLUE_SINCE_CUTOFF = new Date('2026-10-08T11:16:41.476009+02:00').getTime();
+const SKYBLUE_SINCE_CUTOFF = new Date('2026-10-08T10:58:34.451925+02:00').getTime();
 
 // function LogoBadge() {
 //   return (
